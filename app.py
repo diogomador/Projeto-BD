@@ -22,7 +22,7 @@ def cadastro():
         nome = request.form['nome']
         email = request.form['email']
         telefone = request.form['telefone']
-        endereco =request.form['endereco']
+        endereco = request.form['endereco']
 
 
     return render_template('cadastro.html')
