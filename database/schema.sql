@@ -24,12 +24,15 @@ liv_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
 liv_titulo VARCHAR(100),
 liv_isbn VARCHAR(30),
 liv_ano INT,
-liv_autor VARCHAR(100),
-liv_editora VARCHAR(100),
-liv_genero VARCHAR(100),
+liv_aut_id VARCHAR(100),
+liv_edi_id VARCHAR(100),
+liv_gen_id VARCHAR(100),
 liv_pais_origem VARCHAR(100),
 liv_estoque INT,
-liv_preco FLOAT
+liv_preco FLOAT,
+FOREIGN KEY (liv_aut_id) REFERENCES tb_autor(aut_id),
+FOREIGN KEY (liv_edi_id) REFERENCES tb_editora(edi_id),
+FOREIGN KEY (liv_gen_id) REFERENCES tb_genero(gen_id)
 );
 
 CREATE TABLE tb_editora(
@@ -50,15 +53,21 @@ CREATE TABLE tb_genero(
 CREATE TABLE tb_emprestimo(
     emp_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     emp_nome VARCHAR(40),
+    emp_cli_id INT,
     emp_data_ini DATE,
     emp_data_dev DATE,
     emp_total INT,
-    emp_status VARCHAR(15)
+    emp_status VARCHAR(15),
+    FOREIGN KEY (emp_cli_id) REFERENCES tb_cliente(cli_id)
 );
 
 CREATE TABLE tb_emprestimo_livro(
     epl_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    epl_emp_id INT,
+    epl_liv_id INT,
     epl_quantidade INT,
-    epl_preco FLOAT
+    epl_preco FLOAT,
+    FOREIGN KEY (epl_emp_id) REFERENCES tb_emprestimo(emp_id),
+    FOREIGN KEY (epl_liv_id) REFERENCES tb_livros(liv_id)
 );
 
