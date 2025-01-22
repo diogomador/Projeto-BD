@@ -1,7 +1,8 @@
 CREATE DATABASE db_biblioteca;
 USE db_biblioteca;
 
-CREATE TABLE tb_gerente(
+-- Tabela de Gerentes
+CREATE TABLE tb_gerente (
     ger_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     ger_codigo INT,
     ger_nome VARCHAR(255),
@@ -10,64 +11,81 @@ CREATE TABLE tb_gerente(
     ger_senha VARCHAR(100)
 );
 
-CREATE TABLE tb_cliente(
-cli_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-cli_nome VARCHAR(40),
-cli_telefone VARCHAR(15),
-cli_email VARCHAR(100) UNIQUE,
-cli_senha VARCHAR(100),
-cli_endereco VARCHAR(255)
+-- Tabela de Clientes
+CREATE TABLE tb_cliente (
+    cli_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    cli_nome VARCHAR(40),
+    cli_telefone VARCHAR(15),
+    cli_email VARCHAR(100) UNIQUE,
+    cli_senha VARCHAR(100)
 );
 
-CREATE TABLE tb_livros(
-liv_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-liv_titulo VARCHAR(100),
-liv_isbn VARCHAR(30),
-liv_ano INT,
-liv_aut_id VARCHAR(100),
-liv_edi_id VARCHAR(100),
-liv_gen_id VARCHAR(100),
-liv_pais_origem VARCHAR(100),
-liv_estoque INT,
-liv_preco FLOAT,
-FOREIGN KEY (liv_aut_id) REFERENCES tb_autor(aut_id),
-FOREIGN KEY (liv_edi_id) REFERENCES tb_editora(edi_id),
-FOREIGN KEY (liv_gen_id) REFERENCES tb_genero(gen_id)
+-- Tabela de Endereços (relacionada a Clientes)
+CREATE TABLE tb_endereco (
+    end_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    end_cli_id INT NOT NULL,
+    end_estado VARCHAR(2),
+    end_bairro VARCHAR(100),
+    end_rua VARCHAR(100),
+    end_numero VARCHAR(10),
+    FOREIGN KEY (end_cli_id) REFERENCES tb_cliente(cli_id)
 );
 
-CREATE TABLE tb_editora(
-    edi_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    edi_nome VARCHAR(40)
-);
-
-CREATE TABLE tb_autor(
+-- Tabela de Autores
+CREATE TABLE tb_autor (
     aut_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     aut_nome VARCHAR(40)
 );
 
-CREATE TABLE tb_genero(
+-- Tabela de Editoras
+CREATE TABLE tb_editora (
+    edi_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    edi_nome VARCHAR(40)
+);
+
+-- Tabela de Gêneros
+CREATE TABLE tb_genero (
     gen_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     gen_nome VARCHAR(40)
 );
 
-CREATE TABLE tb_emprestimo(
+-- Tabela de Livros
+CREATE TABLE tb_livro (
+    liv_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    liv_titulo VARCHAR(100),
+    liv_isbn VARCHAR(30),
+    liv_ano INT,
+    liv_aut_id INT,
+    liv_edi_id INT,
+    liv_gen_id INT,
+    liv_pais_origem VARCHAR(100),
+    liv_estoque INT,
+    liv_preco FLOAT,
+    liv_ger_id INT NOT NULL,
+    FOREIGN KEY (liv_aut_id) REFERENCES tb_autor(aut_id),
+    FOREIGN KEY (liv_edi_id) REFERENCES tb_editora(edi_id),
+    FOREIGN KEY (liv_gen_id) REFERENCES tb_genero(gen_id),
+    FOREIGN KEY (liv_ger_id) REFERENCES tb_gerente(ger_id)
+);
+
+-- Tabela de Empréstimos
+CREATE TABLE tb_emprestimo (
     emp_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    emp_nome VARCHAR(40),
-    emp_cli_id INT,
+    emp_cli_id INT NOT NULL,
     emp_data_ini DATE,
-    emp_data_dev DATE,
-    emp_total INT,
+    emp_dev DATE,
+    emp_total FLOAT,
     emp_status VARCHAR(15),
     FOREIGN KEY (emp_cli_id) REFERENCES tb_cliente(cli_id)
 );
 
-CREATE TABLE tb_emprestimo_livro(
-    epl_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    epl_emp_id INT,
-    epl_liv_id INT,
-    epl_quantidade INT,
-    epl_preco FLOAT,
-    FOREIGN KEY (epl_emp_id) REFERENCES tb_emprestimo(emp_id),
-    FOREIGN KEY (epl_liv_id) REFERENCES tb_livros(liv_id)
+-- Tabela de Empréstimos-Livros (relaciona empréstimos e livros)
+CREATE TABLE tb_emprestimo_livro (
+    eml_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    eml_emp_id INT NOT NULL,
+    eml_liv_id INT NOT NULL,
+    eml_quantidade INT,
+    eml_preco FLOAT,
+    FOREIGN KEY (eml_emp_id) REFERENCES tb_emprestimo(emp_id),
+    FOREIGN KEY (eml_liv_id) REFERENCES tb_livro(liv_id)
 );
-
