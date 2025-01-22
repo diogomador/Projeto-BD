@@ -25,6 +25,7 @@ CREATE TABLE tb_endereco (
     end_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     end_cli_id INT NOT NULL,
     end_estado VARCHAR(2),
+    end_cidade VARCHAR(100),
     end_bairro VARCHAR(100),
     end_rua VARCHAR(100),
     end_numero VARCHAR(10),
