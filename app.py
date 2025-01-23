@@ -1,15 +1,18 @@
 from flask import Flask, render_template, redirect, request, url_for, flash, session
 from flask_mysqldb import MySQL
-from MySQLdb import IntegrityError
+from MySQLdb._exceptions import IntegrityError
 from flask_bcrypt import Bcrypt
 from functools import wraps
 
 app = Flask(__name__)
 mysql = MySQL(app)
-bcrypt = Bcrypt()
+bcrypt = Bcrypt(app)
 app.config.from_object('models.config.Config')
 
 def is_email_taken(email):
+    """
+    Verifica se o e-mail já está cadastrado na tabela tb_cliente
+    """
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM tb_cliente WHERE cli_email = %s", (email,))
     result = cursor.fetchone()
@@ -18,68 +21,110 @@ def is_email_taken(email):
 
 @app.route('/')
 def index():
+    """
+    Página inicial do site.
+    """
     return render_template('index.html')
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
+    """
+    Página para cadastro de novos clientes e seus endereços.
+    """
     if request.method == 'POST':
-        nome = request.form['nome']
-        email = request.form['email']
-        senha = request.form['senha']
-        telefone = request.form['telefone']
-        estado = request.form['estado']
-        cidade = request.form['cidade']
-        bairro = request.form['bairro']
-        rua = request.form['rua']
-        numero = request.form['numero']
+        # Dados do cliente
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        telefone = request.form.get('telefone')
 
-        # Verifique se o e-mail já está em uso
+        # Dados do endereço
+        estado = request.form.get('estado')
+        cidade = request.form.get('cidade')
+        bairro = request.form.get('bairro')
+        rua = request.form.get('rua')
+        numero = request.form.get('numero')
+
+        # Verificar se o e-mail já está em uso
         if is_email_taken(email):
-            flash('Esse e-mail já está em uso. Escolha outro')
-            return redirect(url_for('register'))
+            flash('Esse e-mail já está em uso. Escolha outro.', 'warning')
+            return redirect(url_for('cadastro'))
 
         # Hash da senha
         hashed_senha = bcrypt.generate_password_hash(senha).decode('utf-8')
 
-        # Tente inserir o novo usuário
         try:
             cursor = mysql.connection.cursor()
-            cursor.execute('INSERT INTO tb_cliente (nome, email, senha, telefone) VALUES (%s, %s, %s, %s)', (nome, email, hashed_senha, telefone))
+
+            # Inserir cliente na tabela tb_cliente
+            cursor.execute(
+                'INSERT INTO tb_cliente (cli_nome, cli_email, cli_senha, cli_telefone) VALUES (%s, %s, %s, %s)',
+                (nome, email, hashed_senha, telefone)
+            )
+            cliente_id = cursor.lastrowid  # ID do cliente recém-cadastrado
+
+            # Inserir endereço na tabela tb_endereco
+            cursor.execute(
+                'INSERT INTO tb_endereco (end_cli_id, end_estado, end_cidade, end_bairro, end_rua, end_numero) '
+                'VALUES (%s, %s, %s, %s, %s, %s)',
+                (cliente_id, estado, cidade, bairro, rua, numero)
+            )
+
+            # Confirmar as alterações
             mysql.connection.commit()
 
-            cursor = mysql.connection.cursor()
-            cursor.execute('INSERT INTO tb_endereco (estado, cidade, bairro, rua, numero) VALUES (%s, %s, %s, %s, %s)', (estado, cidade, bairro, rua, numero))
-            mysql.connection.commit()
-
-            flash('Cadastro realizado com sucesso! Você pode fazer login agora.','info')
+            flash('Cadastro realizado com sucesso! Você pode fazer login agora.', 'success')
             return redirect(url_for('login'))
+
         except IntegrityError:
             mysql.connection.rollback()
-            flash('Erro ao cadastrar cliente.')
+            flash('Erro ao cadastrar cliente. Tente novamente.', 'danger')
             return redirect(url_for('cadastro'))
         finally:
             cursor.close()
 
     return render_template('cadastro.html')
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'POST':
-#         email = request.form['email']
-#         senha = request.form['senha']
-        
-#         # Buscar o usuário no banco de dados
-#         cur = mysql.connection.cursor()
-#         cur.execute("SELECT * FROM users WHERE email = %s", [email])
-#         user = cur.fetchone()
-#         cur.close()
 
-#         if user and bcrypt.check_senha_hash(user[3], senha):  # O campo 3 é a senha
-#             session['logged_in'] = True
-#             session['users_id'] = user[0]  # Armazenar o ID do usuário na sessão
-#             session['username'] = user[1]
-#             flash('Login efetuado com sucesso!', 'success')
-#             return redirect(url_for('dashboard'))
-#         else:
-#             flash('Falha no login. Verifique suas credenciais', 'danger')
-#     return render_template('login.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    Página de login para usuários registrados.
+    """
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        
+        # Validar os dados enviados
+        if not email or not senha:
+            flash('Por favor, preencha todos os campos.', 'danger')
+            return redirect(url_for('login'))
+
+        # Buscar o usuário no banco de dados
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT cli_id, cli_nome, cli_senha FROM tb_cliente WHERE cli_email = %s", (email,))
+        user = cursor.fetchone()
+        cursor.close()
+
+        if user and bcrypt.check_password_hash(user[2], senha):  # user[2] é a senha criptografada
+            # Criar a sessão do usuário
+            session['logged_in'] = True
+            session['user_id'] = user[0]  # ID do cliente
+            session['username'] = user[1]  # Nome do cliente
+            flash('Login efetuado com sucesso!', 'success')
+            return redirect(url_for('dashboard'))  # Redireciona para o dashboard
+        else:
+            flash('Credenciais inválidas. Tente novamente.', 'danger')
+
+    return render_template('login.html')
+
+
+@app.route('/dashboard')
+def dashboard():
+    """
+    Página do painel do usuário após o login.
+    """
+    if not session.get('logged_in'):
+        flash('Por favor, faça login para acessar essa página.', 'warning')
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', username=session.get('username'))
