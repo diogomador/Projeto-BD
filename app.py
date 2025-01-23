@@ -27,19 +27,22 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def login_user(email, senha, user_type):
+    table = 'tb_gerente' if user_type == 'gerente' else 'tb_cliente'
+    cursor = mysql.connection.cursor()
+    cursor.execute(f"SELECT * FROM {table} WHERE {table[:-1]}_email = %s", (email,))
+    user = cursor.fetchone()
+    cursor.close()
+    if user and bcrypt.check_password_hash(user[3 if user_type == 'cliente' else 5], senha):
+        return user
+    return None
 
 @app.route('/')
 def index():
-    """
-    Página inicial do site.
-    """
     return render_template('index.html')
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
-    """
-    Página para cadastro de novos clientes e seus endereços.
-    """
     if request.method == 'POST':
         # Dados do cliente
         nome = request.form.get('nome')
@@ -70,7 +73,7 @@ def cadastro():
                 'INSERT INTO tb_cliente (cli_nome, cli_email, cli_senha, cli_telefone) VALUES (%s, %s, %s, %s)',
                 (nome, email, hashed_senha, telefone)
             )
-            cliente_id = cursor.lastrowid  # ID do cliente recém-cadastrado
+            cliente_id = cursor.lastrowid
 
             # Inserir endereço na tabela tb_endereco
             cursor.execute(
@@ -79,21 +82,17 @@ def cadastro():
                 (cliente_id, estado, cidade, bairro, rua, numero)
             )
 
-            # Confirmar as alterações
             mysql.connection.commit()
-
             flash('Cadastro realizado com sucesso! Você pode fazer login agora.', 'success')
             return redirect(url_for('login'))
 
         except IntegrityError:
             mysql.connection.rollback()
             flash('Erro ao cadastrar cliente. Tente novamente.', 'danger')
-            return redirect(url_for('cadastro'))
         finally:
             cursor.close()
 
     return render_template('cadastro.html')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -101,58 +100,48 @@ def login():
         email = request.form.get('email')
         senha = request.form.get('senha')
 
-        # Verificar se é gerente
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM tb_gerente WHERE ger_email = %s", (email,))
-        gerente = cursor.fetchone()
-        cursor.close()
-
-        if gerente and bcrypt.check_password_hash(gerente[5], senha):  # Índice 5 é a senha
+        gerente = login_user(email, senha, 'gerente')
+        if gerente:
             session['logged_in'] = True
-            session['gerente_id'] = gerente[0]
-            session['nome'] = gerente[2]  # Nome do gerente
-            if gerente[4] == 'admin@biblioteca.com':  # E-mail do admin
+            session['user_id'] = gerente[0]
+            session['email'] = gerente[4]
+            session['nome'] = gerente[2]
+            if gerente[4] == 'admin@biblioteca.com':
                 return redirect(url_for('admin_dashboard'))
-            else:
-                return redirect(url_for('gerente_dashboard'))
+            return redirect(url_for('gerente_dashboard'))
+
+        cliente = login_user(email, senha, 'cliente')
+        if cliente:
+            session['logged_in'] = True
+            session['user_id'] = cliente[0]
+            session['nome'] = cliente[1]
+            return redirect(url_for('cliente_dashboard'))
 
         flash('Credenciais inválidas.', 'danger')
     return render_template('login.html')
 
-@app.route('/dashboard')
-def dashboard():
-    """
-    Página do painel do Usuário após o login.
-    """
-    if not session.get('logged_in'):
-        flash('Por favor, faça login para acessar essa página.', 'warning')
+@app.route('/cliente_dashboard')
+def cliente_dashboard():
+    if not session.get('logged_in') or not session.get('user_id'):
         return redirect(url_for('login'))
-    return render_template('dashboard.html', username=session.get('username'))
+    return render_template('cliente_dashboard.html')
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    """
-    Página do painel do ADM principal após o login.
-    """
-    if not session.get('logged_in') or session.get('gerente_id') is None:
+    if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
+    if session.get('email') != 'admin@biblioteca.com':
+        return redirect(url_for('gerente_dashboard'))
     return render_template('admin_dashboard.html')
 
 @app.route('/gerente_dashboard')
 def gerente_dashboard():
-    """
-    Página do painel do Gerente após o login.
-    """
-    if not session.get('logged_in') or session.get('gerente_id') is None:
+    if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
     return render_template('gerente_dashboard.html')
 
-
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
-    """
-    Permite ao usuário editar seus dados.
-    """
     if 'logged_in' not in session or not session['logged_in']:
         flash('Você precisa estar logado para acessar esta página.', 'danger')
         return redirect(url_for('login'))
@@ -195,7 +184,6 @@ def editar():
 
         return redirect(url_for('editar'))
 
-    # Recuperar os dados atuais do usuário
     cursor = mysql.connection.cursor()
     cursor.execute("""
         SELECT c.cli_nome, c.cli_email, c.cli_telefone, e.end_estado, e.end_cidade, e.end_bairro, e.end_rua, e.end_numero
@@ -210,9 +198,6 @@ def editar():
 
 @app.route('/excluir', methods=['POST'])
 def excluir():
-    """
-    Permite ao usuário excluir sua conta.
-    """
     if 'logged_in' not in session or not session['logged_in']:
         flash('Você precisa estar logado para acessar esta página.', 'danger')
         return redirect(url_for('login'))
@@ -228,7 +213,7 @@ def excluir():
         cursor.execute("DELETE FROM tb_cliente WHERE cli_id = %s", (user_id,))
 
         mysql.connection.commit()
-        session.clear()  # Encerrar a sessão do usuário
+        session.clear()
         flash('Conta excluída com sucesso.', 'info')
     except Exception as e:
         mysql.connection.rollback()
@@ -237,5 +222,4 @@ def excluir():
         cursor.close()
 
     return redirect(url_for('index'))
-
 

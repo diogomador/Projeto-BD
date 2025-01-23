@@ -93,4 +93,4 @@ CREATE TABLE tb_emprestimo_livro (
 
 -- Login do Admin Inicial
 INSERT INTO tb_gerente (ger_codigo, ger_nome, ger_telefone, ger_email, ger_senha)
-VALUES (1, 'Administrador', '40028922', 'admin@biblioteca.com', 'galegoebrocha');
+VALUES (1, 'Administrador', '40028922', 'admin@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2');
