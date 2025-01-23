@@ -19,6 +19,15 @@ def is_email_taken(email):
     cursor.close()
     return result is not None
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in') or session.get('gerente_id') is None or session.get('email') != 'admin@biblioteca.com':
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/')
 def index():
     """
@@ -88,46 +97,56 @@ def cadastro():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    Página de login para usuários registrados.
-    """
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
-        
-        # Validar os dados enviados
-        if not email or not senha:
-            flash('Por favor, preencha todos os campos.', 'danger')
-            return redirect(url_for('login'))
 
-        # Buscar o usuário no banco de dados
+        # Verificar se é gerente
         cursor = mysql.connection.cursor()
-        cursor.execute("SELECT cli_id, cli_nome, cli_senha FROM tb_cliente WHERE cli_email = %s", (email,))
-        user = cursor.fetchone()
+        cursor.execute("SELECT * FROM tb_gerente WHERE ger_email = %s", (email,))
+        gerente = cursor.fetchone()
         cursor.close()
 
-        if user and bcrypt.check_password_hash(user[2], senha):  # user[2] é a senha criptografada
-            # Criar a sessão do usuário
+        if gerente and bcrypt.check_password_hash(gerente[5], senha):  # Índice 5 é a senha
             session['logged_in'] = True
-            session['user_id'] = user[0]  # ID do cliente
-            session['username'] = user[1]  # Nome do cliente
-            flash('Login efetuado com sucesso!', 'success')
-            return redirect(url_for('dashboard'))  # Redireciona para o dashboard
-        else:
-            flash('Credenciais inválidas. Tente novamente.', 'danger')
+            session['gerente_id'] = gerente[0]
+            session['nome'] = gerente[2]  # Nome do gerente
+            if gerente[4] == 'admin@biblioteca.com':  # E-mail do admin
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('gerente_dashboard'))
 
+        flash('Credenciais inválidas.', 'danger')
     return render_template('login.html')
-
 
 @app.route('/dashboard')
 def dashboard():
     """
-    Página do painel do usuário após o login.
+    Página do painel do Usuário após o login.
     """
     if not session.get('logged_in'):
         flash('Por favor, faça login para acessar essa página.', 'warning')
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session.get('username'))
+
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    """
+    Página do painel do ADM principal após o login.
+    """
+    if not session.get('logged_in') or session.get('gerente_id') is None:
+        return redirect(url_for('login'))
+    return render_template('admin_dashboard.html')
+
+@app.route('/gerente_dashboard')
+def gerente_dashboard():
+    """
+    Página do painel do Gerente após o login.
+    """
+    if not session.get('logged_in') or session.get('gerente_id') is None:
+        return redirect(url_for('login'))
+    return render_template('gerente_dashboard.html')
+
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
