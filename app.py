@@ -128,3 +128,95 @@ def dashboard():
         flash('Por favor, faça login para acessar essa página.', 'warning')
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session.get('username'))
+
+@app.route('/editar', methods=['GET', 'POST'])
+def editar():
+    """
+    Permite ao usuário editar seus dados.
+    """
+    if 'logged_in' not in session or not session['logged_in']:
+        flash('Você precisa estar logado para acessar esta página.', 'danger')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        telefone = request.form.get('telefone')
+        estado = request.form.get('estado')
+        cidade = request.form.get('cidade')
+        bairro = request.form.get('bairro')
+        rua = request.form.get('rua')
+        numero = request.form.get('numero')
+
+        try:
+            cursor = mysql.connection.cursor()
+
+            # Atualizar tabela de clientes
+            cursor.execute("""
+                UPDATE tb_cliente 
+                SET cli_nome = %s, cli_email = %s, cli_telefone = %s 
+                WHERE cli_id = %s
+            """, (nome, email, telefone, user_id))
+
+            # Atualizar tabela de endereços
+            cursor.execute("""
+                UPDATE tb_endereco 
+                SET end_estado = %s, end_cidade = %s, end_bairro = %s, end_rua = %s, end_numero = %s 
+                WHERE end_cli_id = %s
+            """, (estado, cidade, bairro, rua, numero, user_id))
+
+            mysql.connection.commit()
+            flash('Dados atualizados com sucesso!', 'success')
+        except Exception as e:
+            mysql.connection.rollback()
+            flash('Erro ao atualizar os dados: ' + str(e), 'danger')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('editar'))
+
+    # Recuperar os dados atuais do usuário
+    cursor = mysql.connection.cursor()
+    cursor.execute("""
+        SELECT c.cli_nome, c.cli_email, c.cli_telefone, e.end_estado, e.end_cidade, e.end_bairro, e.end_rua, e.end_numero
+        FROM tb_cliente c
+        JOIN tb_endereco e ON c.cli_id = e.end_cli_id
+        WHERE c.cli_id = %s
+    """, (user_id,))
+    user_data = cursor.fetchone()
+    cursor.close()
+
+    return render_template('editar.html', user_data=user_data)
+
+@app.route('/excluir', methods=['POST'])
+def excluir():
+    """
+    Permite ao usuário excluir sua conta.
+    """
+    if 'logged_in' not in session or not session['logged_in']:
+        flash('Você precisa estar logado para acessar esta página.', 'danger')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    try:
+        cursor = mysql.connection.cursor()
+        
+        # Excluir endereço associado
+        cursor.execute("DELETE FROM tb_endereco WHERE end_cli_id = %s", (user_id,))
+
+        # Excluir cliente
+        cursor.execute("DELETE FROM tb_cliente WHERE cli_id = %s", (user_id,))
+
+        mysql.connection.commit()
+        session.clear()  # Encerrar a sessão do usuário
+        flash('Conta excluída com sucesso.', 'info')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash('Erro ao excluir a conta: ' + str(e), 'danger')
+    finally:
+        cursor.close()
+
+    return redirect(url_for('index'))
+
+
