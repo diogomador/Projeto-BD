@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cadastro.css') }}">
+    <title>Document</title>
+</head>
+<body>
+    <form method="POST" action="{{ url_for('adicionar_gerente') }}">
+        <label for="codigo">Código:</label>
+        <input type="number" name="codigo" id="codigo" required>
+    
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" id="nome" required>
+    
+        <label for="telefone">Telefone:</label>
+        <input type="text" name="telefone" id="telefone" required>
+    
+        <label for="email">E-mail:</label>
+        <input type="email" name="email" id="email" required>
+    
+        <label for="senha">Senha:</label>
+        <input type="password" name="senha" id="senha" required>
+    
+        <button type="submit">Adicionar Gerente</button>
+    </form>
+    
+</body>
+</html>
