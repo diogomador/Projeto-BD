@@ -150,7 +150,7 @@ def login_gerente():
 @app.route('/cliente_dashboard')
 def cliente_dashboard():
     if not session.get('logged_in') or not session.get('user_id'):
-        return redirect(url_for('login'))
+        return redirect(url_for('login_cliente'))
     return render_template('cliente_dashboard.html')
 
 @app.route('/admin_dashboard')
