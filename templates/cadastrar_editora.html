@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Editora</title>
+</head>
+<body>
+    <h1>Cadastrar Editora</h1>
+    <form method="POST" action="{{ url_for('cadastrar_editora') }}">
+        <label for="editora_nome">Nome da Editora:</label>
+        <input type="text" name="editora_nome" id="editora_nome" required>
+        <button type="submit">Cadastrar Editora</button>
+    </form>
+</body>
+</html>

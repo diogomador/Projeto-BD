@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Gênero</title>
+</head>
+<body>
+    <h1>Cadastrar Gênero</h1>
+    <form method="POST" action="{{ url_for('cadastrar_genero') }}">
+        <label for="genero_nome">Nome do Gênero:</label>
+        <input type="text" name="genero_nome" id="genero_nome" required>
+        <button type="submit">Cadastrar Gênero</button>
+    </form>
+</body>
+</html>
