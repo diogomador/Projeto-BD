@@ -8,9 +8,9 @@
 </head>
 <body>
 
-    <h1>Login de Usuários</h1>
+    <h1>Login de Gerentes</h1>
 
-    <form action="{{ url_for('login') }}" method="post">
+    <form action="{{ url_for('login_gerente') }}" method="post">
         <label for="email">Email:</label>
         <input class="email" type="email" id="email" name="email" placeholder="Digite seu email" required>
 
@@ -19,8 +19,6 @@
 
         <input class="enviar" type="submit" value="Entrar">
     </form>
-
-    <p>Não possui uma conta? <a href="{{ url_for('cadastro') }}">Cadastre-se aqui</a>.</p>
 
 </body>
 </html>

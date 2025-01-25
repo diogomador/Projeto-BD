@@ -27,16 +27,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def login_user(email, senha, user_type):
-    table = 'tb_gerente' if user_type == 'gerente' else 'tb_cliente'
-    cursor = mysql.connection.cursor()
-    cursor.execute(f"SELECT * FROM {table} WHERE {table[:-1]}_email = %s", (email,))
-    user = cursor.fetchone()
-    cursor.close()
-    if user and bcrypt.check_password_hash(user[3 if user_type == 'cliente' else 5], senha):
-        return user
-    return None
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -84,7 +74,7 @@ def cadastro():
 
             mysql.connection.commit()
             flash('Cadastro realizado com sucesso! Você pode fazer login agora.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('login_cliente'))
 
         except IntegrityError:
             mysql.connection.rollback()
@@ -94,31 +84,68 @@ def cadastro():
 
     return render_template('cadastro.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/login_cliente', methods=['GET', 'POST'])
+def login_cliente():
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
 
-        gerente = login_user(email, senha, 'gerente')
-        if gerente:
-            session['logged_in'] = True
-            session['user_id'] = gerente[0]
-            session['email'] = gerente[4]
-            session['nome'] = gerente[2]
-            if gerente[4] == 'admin@biblioteca.com':
-                return redirect(url_for('admin_dashboard'))
-            return redirect(url_for('gerente_dashboard'))
+        try:
+            cursor = mysql.connection.cursor()
+            cursor.execute("SELECT * FROM tb_cliente WHERE cli_email = %s", (email,))
+            cliente = cursor.fetchone()
+            cursor.close()
 
-        cliente = login_user(email, senha, 'cliente')
-        if cliente:
-            session['logged_in'] = True
-            session['user_id'] = cliente[0]
-            session['nome'] = cliente[1]
-            return redirect(url_for('cliente_dashboard'))
+            if not cliente:
+                flash('E-mail não encontrado.', 'danger')
+                return redirect(url_for('login_cliente'))
 
-        flash('Credenciais inválidas.', 'danger')
-    return render_template('login.html')
+            if bcrypt.check_password_hash(cliente[4], senha):  # Índice 4 corresponde à senha
+                session['logged_in'] = True
+                session['user_id'] = cliente[0]
+                session['nome'] = cliente[1]
+                return redirect(url_for('cliente_dashboard'))
+            else:
+                flash('Senha incorreta.', 'danger')
+
+        except Exception as e:
+            print(f"Erro no login do cliente: {e}")
+            flash('Erro interno no servidor.', 'danger')
+
+    return render_template('login_cliente.html')
+
+
+@app.route('/login_gerente', methods=['GET', 'POST'])
+def login_gerente():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+
+        try:
+            cursor = mysql.connection.cursor()
+            cursor.execute("SELECT * FROM tb_gerente WHERE ger_email = %s", (email,))
+            gerente = cursor.fetchone()
+            cursor.close()
+
+            if gerente and bcrypt.check_password_hash(gerente[5], senha):  # Índice 5 corresponde à senha
+                session['logged_in'] = True
+                session['gerente_id'] = gerente[0]  # Índice 0 corresponde ao ID do gerente
+                session['nome'] = gerente[2]  # Índice 2 corresponde ao nome do gerente
+                session['email'] = gerente[4]  # Índice 4 corresponde ao e-mail do gerente
+
+                # Redirecionar para o dashboard apropriado
+                if gerente[4] == 'admin@biblioteca.com':
+                    return redirect(url_for('admin_dashboard'))
+                else:
+                    return redirect(url_for('gerente_dashboard'))
+
+        except Exception as e:
+            print(f"Erro no login do gerente: {e}")  # Apenas para debug; remova em produção.
+
+        flash('Credenciais inválidas para gerente.', 'danger')
+
+    return render_template('login_gerente.html')
+
 
 @app.route('/cliente_dashboard')
 def cliente_dashboard():
@@ -132,6 +159,47 @@ def admin_dashboard():
         return redirect(url_for('login'))
     if session.get('email') != 'admin@biblioteca.com':
         return redirect(url_for('gerente_dashboard'))
+    return render_template('admin_dashboard.html')
+
+@app.route('/adicionar_gerente', methods=['GET', 'POST'])
+@admin_required
+def adicionar_gerente():
+    if request.method == 'POST':
+        codigo = request.form.get('codigo')
+        nome = request.form.get('nome')
+        telefone = request.form.get('telefone')
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+
+        # Verificar se o e-mail já está em uso
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT * FROM tb_gerente WHERE ger_email = %s", (email,))
+        gerente_existente = cursor.fetchone()
+
+        if gerente_existente:
+            flash('E-mail já cadastrado para outro gerente.', 'danger')
+            return redirect(url_for('adicionar_gerente'))
+
+        # Gerar o hash da senha
+        hashed_senha = bcrypt.generate_password_hash(senha).decode('utf-8')
+
+        # Inserir o gerente na tabela
+        try:
+            cursor.execute(
+                'INSERT INTO tb_gerente (ger_codigo, ger_nome, ger_telefone, ger_email, ger_senha) '
+                'VALUES (%s, %s, %s, %s, %s)',
+                (codigo, nome, telefone, email, hashed_senha)
+            )
+            mysql.connection.commit()
+            flash('Gerente adicionado com sucesso!', 'success')
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Erro ao adicionar gerente: {e}', 'danger')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('adicionar_gerente'))
+
     return render_template('admin_dashboard.html')
 
 @app.route('/gerente_dashboard')
@@ -223,6 +291,135 @@ def excluir():
 
     return redirect(url_for('index'))
 
-@app.route('/cadastro_livro')
-def cadastro_livro():
-    return render_template('cadastro_livro.html')
+@app.route('/cadastrar_autor', methods=['GET', 'POST'])
+def cadastrar_autor():
+    if not session.get('logged_in') or not session.get('gerente_id'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        autor_nome = request.form.get('autor_nome')
+
+        try:
+            cursor = mysql.connection.cursor()
+
+            # Inserir autor na tabela
+            cursor.execute("INSERT INTO tb_autor (aut_nome) VALUES (%s)", (autor_nome,))
+            mysql.connection.commit()
+            flash('Autor cadastrado com sucesso!', 'success')
+
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Erro ao cadastrar o autor: {e}', 'danger')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('cadastrar_autor'))
+
+    return render_template('cadastrar_autor.html')
+
+
+@app.route('/cadastrar_editora', methods=['GET', 'POST'])
+def cadastrar_editora():
+    if not session.get('logged_in') or not session.get('gerente_id'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        editora_nome = request.form.get('editora_nome')
+
+        try:
+            cursor = mysql.connection.cursor()
+
+            # Inserir editora na tabela
+            cursor.execute("INSERT INTO tb_editora (edi_nome) VALUES (%s)", (editora_nome,))
+            mysql.connection.commit()
+            flash('Editora cadastrada com sucesso!', 'success')
+
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Erro ao cadastrar a editora: {e}', 'danger')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('cadastrar_editora'))
+
+    return render_template('cadastrar_editora.html')
+
+
+@app.route('/cadastrar_genero', methods=['GET', 'POST'])
+def cadastrar_genero():
+    if not session.get('logged_in') or not session.get('gerente_id'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        genero_nome = request.form.get('genero_nome')
+
+        try:
+            cursor = mysql.connection.cursor()
+
+            # Inserir gênero na tabela
+            cursor.execute("INSERT INTO tb_genero (gen_nome) VALUES (%s)", (genero_nome,))
+            mysql.connection.commit()
+            flash('Gênero cadastrado com sucesso!', 'success')
+
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Erro ao cadastrar o gênero: {e}', 'danger')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('cadastrar_genero'))
+
+    return render_template('cadastrar_genero.html')
+
+@app.route('/cadastrar_livro', methods=['GET', 'POST'])
+def cadastrar_livro():
+    if not session.get('logged_in') or not session.get('gerente_id'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        titulo = request.form.get('titulo')
+        isbn = request.form.get('isbn')
+        ano = request.form.get('ano')
+        autor_id = request.form.get('autor')
+        editora_id = request.form.get('editora')
+        genero_id = request.form.get('genero')
+        pais_origem = request.form.get('pais_origem')
+        estoque = request.form.get('estoque')
+        preco = request.form.get('preco')
+        gerente_id = session['gerente_id']  # ID do gerente logado
+
+        try:
+            cursor = mysql.connection.cursor()
+
+            # Inserir o livro na tabela
+            cursor.execute("""
+                INSERT INTO tb_livro (
+                    liv_titulo, liv_isbn, liv_ano, liv_aut_id, liv_edi_id, liv_gen_id,
+                    liv_pais_origem, liv_estoque, liv_preco, liv_ger_id
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (titulo, isbn, ano, autor_id, editora_id, genero_id, pais_origem, estoque, preco, gerente_id))
+
+            mysql.connection.commit()
+            flash('Livro cadastrado com sucesso!', 'success')
+
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Erro ao cadastrar o livro: {e}', 'danger')
+        finally:
+            cursor.close()
+
+        return redirect(url_for('cadastrar_livro'))
+
+    # Buscar autores, editoras e gêneros para exibir no formulário
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT aut_id, aut_nome FROM tb_autor")
+    autores = cursor.fetchall()
+
+    cursor.execute("SELECT edi_id, edi_nome FROM tb_editora")
+    editoras = cursor.fetchall()
+
+    cursor.execute("SELECT gen_id, gen_nome FROM tb_genero")
+    generos = cursor.fetchall()
+    cursor.close()
+
+    return render_template('cadastro_livro.html', autores=autores, editoras=editoras, generos=generos)
