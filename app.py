@@ -223,3 +223,6 @@ def excluir():
 
     return redirect(url_for('index'))
 
+@app.route('/cadastro_livro')
+def cadastro_livro():
+    return render_template('cadastro_livro.html')
