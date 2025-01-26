@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 from MySQLdb._exceptions import IntegrityError
 from flask_bcrypt import Bcrypt
 from functools import wraps
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 mysql = MySQL(app)
@@ -423,3 +424,82 @@ def cadastrar_livro():
     cursor.close()
 
     return render_template('cadastro_livro.html', autores=autores, editoras=editoras, generos=generos)
+
+
+@app.route('/emprestimo', methods=['GET', 'POST'])
+def emprestimo():
+
+    if 'user_id' not in session:
+        flash('Você precisa estar logado para realizar um empréstimo.', 'danger')
+        return redirect(url_for('login_cliente'))
+    
+    if request.method == 'POST':
+        # Processa o formulário enviado
+        livros_ids = request.form.getlist('livros[]')  # Use livros[] para capturar como lista
+        quantidades = request.form.getlist('quantidades[]')  # Use quantidades[] para capturar como lista
+
+        if not livros_ids or not quantidades:
+            flash('Nenhum livro foi selecionado para empréstimo.', 'danger')
+            return redirect('/emprestimo')
+
+        emprestimo_livros = []
+        for livro_id, quantidade in zip(livros_ids, quantidades):
+            emprestimo_livros.append({
+                'livro_id': int(livro_id),
+                'quantidade': int(quantidade)
+            })
+
+        # Manipulação de tempo
+        data_inicio = datetime.now()
+        data_devolucao = data_inicio + timedelta(weeks=2)
+
+        # Formatar as datas formato 'YYYY-MM-DD HH:MM:SS'
+        data_inicio_str = data_inicio.strftime('%Y-%m-%d %H:%M:%S')
+        data_devolucao_str = data_devolucao.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Lógica de criação do empréstimo
+        cursor = mysql.connection.cursor()
+
+        # Calcula o total do empréstimo
+        total = 0
+        for item in emprestimo_livros:
+            cursor.execute("SELECT liv_preco, liv_estoque FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
+            livro = cursor.fetchone()
+            if not livro or livro[1] < item['quantidade']:
+                flash(f'O livro com ID {item["livro_id"]} não está disponível na quantidade solicitada.', 'danger')
+                cursor.close()
+                return redirect('/emprestimo')
+            total += livro[0] * item['quantidade']
+
+        # Insere o registro de empréstimo
+        cursor.execute(
+            "INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_dev, emp_status, emp_total) VALUES (%s, %s, %s, %s, %s)",
+            (session['user_id'], data_inicio_str, data_devolucao_str, 'Ativo', total)
+        )
+        emprestimo_id = cursor.lastrowid
+
+        # Insere os livros no empréstimo
+        for item in emprestimo_livros:
+            cursor.execute(
+                "INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco) VALUES (%s, %s, %s, %s)",
+                (emprestimo_id, item['livro_id'], item['quantidade'], item['quantidade'] * livro[0])
+            )
+            # Atualiza o estoque
+            cursor.execute(
+                "UPDATE tb_livro SET liv_estoque = liv_estoque - %s WHERE liv_id = %s",
+                (item['quantidade'], item['livro_id'])
+            )
+
+        mysql.connection.commit()
+        cursor.close()
+
+        flash('Empréstimo realizado com sucesso!', 'success')
+        return redirect('/emprestimo')
+
+    # Método GET: Exibe os livros disponíveis
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT *, gen_nome, aut_nome FROM tb_livro JOIN tb_genero ON gen_id=liv_gen_id JOIN tb_autor ON aut_id=liv_aut_id")
+    livros = cursor.fetchall()
+    cursor.close()
+
+    return render_template('emprestimo.html', livros=livros)
