@@ -425,7 +425,6 @@ def cadastrar_livro():
 
     return render_template('cadastro_livro.html', autores=autores, editoras=editoras, generos=generos)
 
-
 @app.route('/emprestimo', methods=['GET', 'POST'])
 def emprestimo():
 
@@ -503,3 +502,147 @@ def emprestimo():
     cursor.close()
 
     return render_template('emprestimo.html', livros=livros)
+
+# Listagem de usuários com ordenação
+@app.route('/listar_clientes', methods=['GET'])
+def listar_clientes():
+    ordem = request.args.get('ordem', 'asc')  # 'asc' para crescente, 'desc' para decrescente
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute(f"SELECT cli_id, cli_nome, cli_email FROM tb_cliente ORDER BY cli_nome {ordem.upper()}")
+        clientes = cursor.fetchall()
+        cursor.close()
+        return render_template('listar_clientes.html', clientes=clientes, ordem=ordem)
+    except Exception as e:
+        flash(f'Erro ao listar clientes: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
+
+# Listagem de livros com ordenação
+@app.route('/listar_livros', methods=['GET'])
+def listar_livros():
+    ordem = request.args.get('ordem', 'asc')  # 'asc' ou 'desc'
+    try:
+        cursor = mysql.connection.cursor()
+        # Ajustar a consulta para incluir os campos corretos
+        cursor.execute(f"""
+            SELECT 
+                liv_titulo AS titulo, 
+                liv_autor AS autor, 
+                liv_genero AS genero, 
+                liv_disponivel AS disponivel 
+            FROM tb_livro 
+            ORDER BY liv_titulo {ordem.upper()}
+        """)
+        # Fetchall retorna uma lista de dicionários
+        livros = cursor.fetchall()
+        cursor.close()
+        return render_template('listar_livros.html', livros=livros, ordem=ordem)
+    except Exception as e:
+        flash(f'Erro ao listar livros: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
+
+
+# Listagem de empréstimos com ordenação
+@app.route('/listar_emprestimos', methods=['GET'])
+def listar_emprestimos():
+    ordem = request.args.get('ordem', 'asc')  # 'asc' ou 'desc'
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute(f"""
+            SELECT emp_id, emp_data_ini, emp_dev, emp_total, cli_nome, liv_titulo
+            FROM tb_emprestimo
+            INNER JOIN tb_cliente ON tb_emprestimo.emp_cli_id = tb_cliente.cli_id
+            INNER JOIN tb_livro ON tb_emprestimo.emp_liv_id = tb_livro.liv_id
+            ORDER BY emp_data_ini {ordem.upper()}
+        """)
+        emprestimos = cursor.fetchall()
+        cursor.close()
+        return render_template('listar_emprestimos.html', emprestimos=emprestimos, ordem=ordem)
+    except Exception as e:
+        flash(f'Erro ao listar empréstimos: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
+
+# Total de empréstimos em reais por usuário
+@app.route('/relatorio_emprestimos_usuario', methods=['POST', 'GET'])
+def relatorio_emprestimos_usuario():
+    if request.method == 'POST':
+        usuario_id = request.form.get('usuario_id')
+        data_inicio = request.form.get('data_inicio')
+        data_fim = request.form.get('data_fim')
+        try:
+            cursor = mysql.connection.cursor()
+            cursor.execute("""
+                SELECT SUM(emp_valor) 
+                FROM tb_emprestimo 
+                WHERE emp_usu_id = %s AND emp_data BETWEEN %s AND %s
+            """, (usuario_id, data_inicio, data_fim))
+            total = cursor.fetchone()[0] or 0
+            cursor.close()
+            return render_template('relatorio_emprestimos_usuario.html', total=total)
+        except Exception as e:
+            flash(f'Erro ao gerar relatório: {e}', 'danger')
+            return redirect(url_for('gerente_dashboard'))
+    return render_template('relatorio_emprestimos_usuario.html')
+
+# Usuários com empréstimos acima de R$100,00
+@app.route('/usuarios_acima_cem', methods=['GET'])
+def usuarios_acima_cem():
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("""
+            SELECT usu_nome, SUM(emp_valor) AS total
+            FROM tb_emprestimo
+            INNER JOIN tb_usuario ON tb_emprestimo.emp_usu_id = tb_usuario.usu_id
+            GROUP BY emp_usu_id
+            HAVING total > 100
+        """)
+        usuarios = cursor.fetchall()
+        cursor.close()
+        return render_template('usuarios_acima_cem.html', usuarios=usuarios)
+    except Exception as e:
+        flash(f'Erro ao gerar relatório: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
+
+# Top 10 livros mais pedidos
+@app.route('/top_livros', methods=['GET'])
+def top_livros():
+    dias = request.args.get('dias', 30)
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("""
+            SELECT liv_titulo, COUNT(emp_id) AS pedidos
+            FROM tb_emprestimo
+            INNER JOIN tb_livro ON tb_emprestimo.emp_liv_id = tb_livro.liv_id
+            WHERE emp_data >= DATE_SUB(CURDATE(), INTERVAL %s DAY)
+            GROUP BY emp_liv_id
+            ORDER BY pedidos DESC
+            LIMIT 10
+        """, (dias,))
+        livros = cursor.fetchall()
+        cursor.close()
+        return render_template('top_livros.html', livros=livros)
+    except Exception as e:
+        flash(f'Erro ao gerar relatório: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
+
+# Livros não emprestados
+@app.route('/livros_nao_emprestados', methods=['GET'])
+def livros_nao_emprestados():
+    dias = request.args.get('dias', 30)
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("""
+            SELECT liv_titulo
+            FROM tb_livro
+            WHERE liv_id NOT IN (
+                SELECT DISTINCT emp_liv_id 
+                FROM tb_emprestimo
+                WHERE emp_data >= DATE_SUB(CURDATE(), INTERVAL %s DAY)
+            )
+        """, (dias,))
+        livros = cursor.fetchall()
+        cursor.close()
+        return render_template('livros_nao_emprestados.html', livros=livros)
+    except Exception as e:
+        flash(f'Erro ao gerar relatório: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
