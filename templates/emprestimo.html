@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empréstimo</title>
+</head>
+<body>
+    <h1>Empréstimo</h1>
+    <form method="POST" action="{{ url_for('') }}">
+        <label for="data-ini">Data de Início:</label>
+        <input type="datetime" class="data" name="data_ini" placeholder="Data de Início">
+        <label for="devolucao">Devolução:</label>
+        <input type="datetime" class="dev" name="devolucao" placeholder="Devolução">
+        <label for="total">Total:</label>
+        <input type="number" class="total" name="total" placeholder="Total">
+        <button type="submit" class="botao">Enviar</button>
+    </form>
+</body>
+</html>

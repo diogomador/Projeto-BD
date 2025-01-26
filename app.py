@@ -374,7 +374,7 @@ def cadastrar_genero():
 @app.route('/cadastrar_livro', methods=['GET', 'POST'])
 def cadastrar_livro():
     if not session.get('logged_in') or not session.get('gerente_id'):
-        return redirect(url_for('login'))
+        return redirect(url_for('login_gerente'))
 
     if request.method == 'POST':
         titulo = request.form.get('titulo')
