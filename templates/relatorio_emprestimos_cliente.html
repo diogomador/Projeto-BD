@@ -5,19 +5,20 @@
     <title>Relatório de Empréstimos por Usuário</title>
 </head>
 <body>
-    <h1>Relatório de Empréstimos por Usuário</h1>
-    <table border="1">
+    <table>
         <thead>
             <tr>
-                <th>Usuário</th>
-                <th>Quantidade de Empréstimos</th>
+                <th>Nome do Cliente</th>
+                <th>Total de Empréstimos</th>
+                <th>Total Valor</th>
             </tr>
         </thead>
         <tbody>
-            {% for usuario, quantidade in relatorio %}
+            {% for item in relatorio %}
             <tr>
-                <td>{{ usuario }}</td>
-                <td>{{ quantidade }}</td>
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
             </tr>
             {% endfor %}
         </tbody>

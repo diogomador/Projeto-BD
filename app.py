@@ -598,44 +598,40 @@ def listar_emprestimos():
         return redirect(url_for('gerente_dashboard'))
 
 # Total de empréstimos em reais por usuário
-@app.route('/relatorio_emprestimos_cliente', methods=['POST', 'GET'])
+@app.route('/relatorio_emprestimos_cliente', methods=['GET'])
 @admin_required
 def relatorio_emprestimos_cliente():
-    if request.method == 'POST':
-        cliente_id = request.form.get('cliente_id')
-        data_inicio = request.form.get('data_inicio')
-        data_fim = request.form.get('data_fim')
-        try:
-            cursor = mysql.connection.cursor()
-            cursor.execute("""
-                SELECT SUM(emp_total) 
-                FROM tb_emprestimo 
-                WHERE emp_cli_id = %s AND emp_data_ini BETWEEN %s AND %s
-            """, (cliente_id, data_inicio, data_fim))
-            total = cursor.fetchone()[0] or 0
-            cursor.close()
-            return render_template('relatorio_emprestimos_cliente.html', total=total)
-        except Exception as e:
-            flash(f'Erro ao gerar relatório: {e}', 'danger')
-            return redirect(url_for('gerente_dashboard'))
-    return render_template('relatorio_emprestimos_cliente.html')
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("""
+            SELECT cli.cli_nome, 
+                   COUNT(emp.emp_id) AS total_emprestimos,
+                   ROUND(SUM(emp.emp_total), 2) AS total_valor
+            FROM tb_cliente cli
+            LEFT JOIN tb_emprestimo emp ON cli.cli_id = emp.emp_cli_id
+            GROUP BY cli.cli_id
+            ORDER BY total_emprestimos DESC
+        """)
+        relatorio = cursor.fetchall()
+        cursor.close()
+        return render_template('relatorio_emprestimos_cliente.html', relatorio=relatorio)
+    except Exception as e:
+        flash(f'Erro ao gerar relatório: {e}', 'danger')
+        return redirect(url_for('gerente_dashboard'))
 
 # Usuários com empréstimos acima de R$100,00
 @app.route('/clientes_acima_cem', methods=['GET'])
 @admin_required
 def clientes_acima_cem():
-    data_inicio = request.args.get('data_inicio')
-    data_fim = request.args.get('data_fim')
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            SELECT cli_nome, SUM(emp_total) AS total
-            FROM tb_emprestimo
-            INNER JOIN tb_cliente ON tb_emprestimo.emp_cli_id = tb_cliente.cli_id
-            WHERE emp_data_ini BETWEEN %s AND %s
-            GROUP BY emp_cli_id
+            SELECT cli.cli_nome, SUM(emp.emp_total) AS total
+            FROM tb_cliente cli
+            INNER JOIN tb_emprestimo emp ON cli.cli_id = emp.emp_cli_id
+            GROUP BY cli.cli_id
             HAVING total > 100
-        """, (data_inicio, data_fim))
+        """)
         clientes = cursor.fetchall()
         cursor.close()
         return render_template('clientes_acima_cem.html', clientes=clientes)

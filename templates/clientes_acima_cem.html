@@ -6,19 +6,22 @@
     <title>Usuários com Mais de 100 Empréstimos</title>
 </head>
 <body>
-    <h1>Usuários com Mais de 100 Empréstimos</h1>
-    <table border="1">
+    <table>
         <thead>
             <tr>
-                <th>Usuário</th>
-                <th>Quantidade de Empréstimos</th>
+                <th>Nome do Cliente</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
-            {% for usuario, quantidade in usuarios_acima_cem %}
+            {% for cliente in clientes %}
             <tr>
-                <td>{{ usuario }}</td>
-                <td>{{ quantidade }}</td>
+                <td>{{ cliente[0] }}</td>
+                <td>{{ cliente[1] | format('%.2f') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">Nenhum cliente encontrado.</td>
             </tr>
             {% endfor %}
         </tbody>
