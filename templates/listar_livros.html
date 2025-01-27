@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='listar_livros.css') }}">
     <title>Listar Livros</title>
 </head>
 <body>
-    <main>
-        <h1>Lista de Livros</h1>
-        <table>
+    <main class="main">
+        <div class="list_titulo">
+            <h1>Lista de Livros</h1>
+        </div>
+        
+        <table class="table">
             <thead>
                 <tr>
                     <th>
@@ -33,8 +37,8 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
         </table>
-        <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
     </main>
 </body>
 </html>
