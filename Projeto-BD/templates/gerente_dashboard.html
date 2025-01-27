@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='gerente.css') }}">
+    <title>Dashboard do Gerente</title>
+</head>
+<body> 
+    <main>
+        <div>
+            <h1>Bem-vindo, {{ session['nome'] }}!</h1>
+
+            <div id="atividades">
+                <h1> O que você deseja fazer hoje?</h1>
+                <ul>
+                    <li><a href="{{ url_for('cadastrar_livro') }}">Cadastrar Livro</a></li>
+                    <li><a href="{{ url_for('cadastrar_autor') }}">Cadastrar Autor</a></li>
+                    <li><a href="{{ url_for('cadastrar_editora') }}">Cadastrar Editora</a></li>
+                    <li><a href="{{ url_for('cadastrar_genero') }}">Cadastrar Gênero</a></li>
+                </ul>
+            </div>
+
+            <form action="{{url_for('index')}}" method="get" id="sair">
+                <button id="but_sair" type="submit">Sair</button>
+            </form>
+        </div>
+        <aside>
+            <div id="infos">
+                <div class="info">
+                    <span>{{total_livros}}</span>
+                    <h1>Livros</h1>
+                </div>
+                <div class="info">
+                    <span>{{total_autores}}</span>
+                    <h1>Autores</h1>
+                </div>
+                <div class="info">
+                    <span>{{total_editoras}}</span>
+                    <h1>Editoras</h1>
+                </div>
+                <div class="info">
+                    <span>{{total_generos}}</span>
+                    <h1>Generos</h1>
+                </div>
+            </div>
+        </aside>
+    </main>
+</body>
+</html>

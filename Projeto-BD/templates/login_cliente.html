@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <title>Login</title>
+</head>
+<body>
+
+    <h1>Login de Usuários</h1>
+
+    <form action="{{ url_for('login_cliente') }}" method="post">
+        <label for="email">Email:</label>
+        <input class="email" type="email" id="email" name="email" placeholder="Digite seu email" required>
+
+        <label for="senha">Senha:</label>
+        <input class=senha type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+
+        <input class="enviar" type="submit" value="Entrar">
+    </form>
+
+    <p>Não possui uma conta? <a href="{{ url_for('cadastro') }}">Cadastre-se aqui</a>.</p>
+    <p>Gerente <a href="{{ url_for('login_gerente') }}">Faça Login</a>.</p>
+
+</body>
+</html>

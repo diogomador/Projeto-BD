@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cliente.css') }}">
+    <title>Cadastrar Editora</title>
+</head>
+<body>
+    <main class="conteudo">
+        <div class="cad_titulo">
+            <h1>Bem-Vindo, {{session['nome']}}</h1>
+        </div>
+        <aside>
+            <div id="cli-op">
+                <h1> O que você deseja fazer hoje?</h1>
+                <ul>
+                    <li><a href="{{ url_for('editar') }}">Editar Perfil</a></li>
+                    <li><a href="{{ url_for('emprestimo') }}">Fazer Empréstimo</a></li>
+                    <li><a href="{{ url_for('index') }}">Sair</a></li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+</body>
+</html>
