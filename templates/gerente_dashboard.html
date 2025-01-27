@@ -8,9 +8,7 @@
 </head>
 <body> 
     <main>
-        <div>
-            <h1>Bem-vindo, {{ session['nome'] }}!</h1>
-
+        <div id="container">
             <div id="atividades">
                 <h1> O que você deseja fazer hoje?</h1>
                 <ul>
@@ -20,8 +18,19 @@
                     <li><a href="{{ url_for('cadastrar_genero') }}">Cadastrar Gênero</a></li>
                 </ul>
             </div>
+            <div id="filtros">
+                <h2>Filtros</h2>
+                <ul>
+                    <li><a href="{{ url_for('listar_livros') }}">Listar Livros</a></li>
+                    <li><a href="{{ url_for('listar_clientes') }}">Listar Clientes</a></li>
+                    <li><a href="{{ url_for('listar_emprestimos') }}">Listar Empréstimos</a></li>
+                    <li><a href="{{ url_for('top_livros') }}">Top Livros Pedidos</a></li>
+                    <li><a href="{{ url_for('livros_nao_emprestados') }}">Livros Não Emprestados</a></li>
+                </ul>
+            </div>
 
-            <form action="{{url_for('index')}}" method="get" id="sair">
+
+            <form action="{{ url_for('index') }}" method="get" id="sair">
                 <button id="but_sair" type="submit">Sair</button>
             </form>
         </div>
@@ -41,7 +50,7 @@
                 </div>
                 <div class="info">
                     <span>{{total_generos}}</span>
-                    <h1>Generos</h1>
+                    <h1>Gêneros</h1>
                 </div>
             </div>
         </aside>

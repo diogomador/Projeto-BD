@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Listar Clientes</title>
 </head>
 <body>
-    <table>
-        <thead>
-            <tr>
-                <th><a href="{{ url_for('listar_clientes', ordem='asc') }}">▲</a> Nome <a href="{{ url_for('listar_clientes', ordem='desc') }}">▼</a></th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cliente in clientes %}
-            <tr>
-                <td>{{ cliente[1] }}</td>
-                <td>{{ cliente[2] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
+    <main>
+        <h1>Lista de Clientes</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <a href="{{ url_for('listar_clientes', ordem='asc') }}">▲</a>
+                        Nome
+                        <a href="{{ url_for('listar_clientes', ordem='desc') }}">▼</a>
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente[1] }}</td>  <!-- Acesso correto à coluna cli_nome -->
+                    <td>{{ cliente[2] }}</td>  <!-- Acesso correto à coluna cli_email -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
+    </main>
 </body>
 </html>

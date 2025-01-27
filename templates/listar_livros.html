@@ -6,26 +6,35 @@
     <title>Listar Livros</title>
 </head>
 <body>
-    <h1>Lista de Livros</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Gênero</th>
-                <th>Disponibilidade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for livro in livros %}
-            <tr>
-                <td>{{ livro.titulo }}</td>
-                <td>{{ livro.autor }}</td>
-                <td>{{ livro.genero }}</td>
-                <td>{{ 'Disponível' if livro.disponivel else 'Emprestado' }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <main>
+        <h1>Lista de Livros</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <a href="{{ url_for('listar_livros', ordem='asc') }}">▲</a>
+                        Título
+                        <a href="{{ url_for('listar_livros', ordem='desc') }}">▼</a>
+                    </th>
+                    <th>
+                        Autor
+                    </th>
+                    <th>
+                        Editora
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livro in livros %}
+                <tr>
+                    <td>{{ livro[1] }}</td>  <!-- Título -->
+                    <td>{{ livro[2] }}</td>  <!-- Autor -->
+                    <td>{{ livro[3] }}</td>  <!-- Editora -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
+    </main>
 </body>
 </html>

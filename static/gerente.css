@@ -134,6 +134,30 @@ aside{
     color: #f9f9f9;
 }
 
+#container {
+    display: flex;
+    width: 100vw;
+    gap: 2rem; /* Espaçamento entre as divs */
+}
+
+#filtros, #atividades {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #f9f9f9;
+    width: 45vw; /* Ajuste a largura conforme necessário */
+    height: 40vh; /* Altura automática para caber o conteúdo */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 1rem; /* Adiciona um padding para melhor espaçamento */
+}
+
+/* Estilos para h2 dentro da div de filtros */
+#filtros h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem; /* Espaçamento inferior */
+}
+
 #sair{
     background-color: transparent;
     box-shadow: none;
