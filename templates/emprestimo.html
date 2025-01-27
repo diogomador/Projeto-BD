@@ -3,38 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empréstimo de Livros</title>
     <link rel="stylesheet" href="{{url_for('static', filename='emprestimo.css')}}" type="text/css">
+    <title>Empréstimo</title>
 </head>
 <body>
-    <h1>Realizar Empréstimos de Livros</h1>
-    <a href="{{ url_for('cliente_dashboard') }}">Voltar ao Dashboard</a>
-    <form id="emprestimoForm" method="POST" action="{{url_for('emprestimo')}}">
-        {% for livro in livros %}
-        <div class="livro-container">
-            <div class="livro-header">{{ livro[1] }}</div>
-            <div class="livro-detalhes">Gênero: {{livro[-2]}}</div>
-            <div class="livro-detalhes">Autor(a): {{livro[-1]}}</div>
-            <div class="livro-detalhes">Preço: R$ {{ livro[9] }}</div>
-            <div class="livro-detalhes">Quantidade disponível: {{ livro[8] }}</div>
-            <button type="button" class="adicionar" data-id="{{ livro[0] }}" data-titulo="{{ livro[1] }}" data-preco="{{ livro[9] }}" data-estoque="{{ livro[8] }}">Adicionar à lista</button>
+    <nav>
+        <a href="cliente_dashboard">Início</a>
+        <a href="editar">Editar</a>
+        <a style="background-color: #052c25; color: white" href="emprestimo">Novo Emprestimo</a>
+        <a href="index">Sair</a>
+    </nav>
+    <main>
+        <div class="livro_emp">
+            <div class="cad_titulo">
+                <h1>Empréstimos de Livros</h1>
+            </div>
+            <form id="emprestimoForm" method="POST" action="{{url_for('emprestimo')}}">
+                <div class="livros-emp">
+                    {% for livro in livros %}
+                    <div class="livro-container">
+                        <div class="livro-header">{{ livro[1] }}</div>
+                        <div class="livro-detalhes">Gênero: {{livro[-2]}}</div>
+                        <div class="livro-detalhes">Autor(a): {{livro[-1]}}</div>
+                        <div class="livro-detalhes">Preço: R$ {{ livro[9] }}</div>
+                        <div class="livro-detalhes">Quantidade disponível: {{ livro[8] }}</div>
+                        <button type="button" class="adicionar" data-id="{{ livro[0] }}" data-titulo="{{ livro[1] }}" data-preco="{{ livro[9] }}">Adicionar à lista</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="livros_add">
+                    <h2>Livros Selecionados</h2>
+                    <div id="selecionados">
+                        <!-- Livros selecionados serão adicionados aqui dinamicamente -->
+                    </div>
+                    <button type="submit">Confirmar Empréstimo</button>
+                </div>
+            </form>
         </div>
-        {% endfor %}
-
-        <h2>Livros Selecionados</h2>
-        <div id="selecionados">
-            <!-- Livros selecionados serão adicionados aqui dinamicamente -->
-        </div>
-
-        <h3>Total: R$ <span id="total">0.00</span></h3>
-
-        <!-- Campo para duração do empréstimo -->
-        <label for="duracao">Duração do empréstimo (dias): </label>
-        <input type="number" id="duracao" name="duracao" min="1" placeholder="Ex.: 14" value="1" required>
-
-        <button type="submit">Confirmar Empréstimo</button>
-    </form>
-
-    <script src="{{url_for('static', filename='js/script.js')}}"></script>
+    </main>
+    
+    <script>
+        const selecionadosDiv = document.getElementById('selecionados');
+        const form = document.getElementById('emprestimoForm');
+    
+        document.querySelectorAll('.adicionar').forEach(button => {
+            button.addEventListener('click', () => {
+                const livroId = button.dataset.id;
+                const titulo = button.dataset.titulo;
+                const preco = button.dataset.preco;
+    
+                if (document.querySelector(`#livro-${livroId}`)) {
+                    alert('Este livro já foi adicionado!');
+                    return;
+                }
+    
+                const div = document.createElement('div');
+                div.id = `livro-${livroId}`;
+                div.innerHTML = `
+                    <p>${titulo} (R$ ${preco})</p>
+                    <input type="hidden" name="livros[]" value="${livroId}">
+                    <label>Quantidade: </label>
+                    <input type="number" name="quantidades[]" min="1" value="1">
+                    <button type="button" onclick="remover(${livroId})">Remover</button>
+                `;
+                selecionadosDiv.appendChild(div);
+    
+                // Log para depuração
+                console.log('Livros selecionados:', selecionadosDiv.innerHTML);
+            });
+        });
+    
+        function remover(id) {
+            const div = document.getElementById(`livro-${id}`);
+            if (div) {
+                div.querySelector('input[name="livros[]"]').remove();
+                div.querySelector('input[name="quantidades[]"]').remove();
+                div.remove();
+                // Log para depuração
+                console.log('Livros após remoção:', selecionadosDiv.innerHTML);
+            }
+        }
+    </script>
 </body>
 </html>

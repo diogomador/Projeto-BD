@@ -1,53 +1,80 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Livro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='cadastrosgerais.css') }}">
+    <title>Document</title>
 </head>
 <body>
-    <form method="POST" action="{{ url_for('cadastrar_livro') }}">
-        <label for="titulo">Título do Livro:</label>
-        <input type="text" name="titulo" id="titulo" required>
-    
-        <label for="isbn">ISBN:</label>
-        <input type="text" name="isbn" id="isbn" required>
-    
-        <label for="ano">Ano de Publicação:</label>
-        <input type="number" name="ano" id="ano" required>
-    
-        <label for="autor">Autor:</label>
-        <select name="autor" id="autor" required>
-            {% for autor in autores %}
-            <option value="{{ autor[0] }}">{{ autor[1] }}</option>
-            {% endfor %}
-        </select>
-    
-        <label for="editora">Editora:</label>
-        <select name="editora" id="editora" required>
-            {% for editora in editoras %}
-            <option value="{{ editora[0] }}">{{ editora[1] }}</option>
-            {% endfor %}
-        </select>
-    
-        <label for="genero">Gênero:</label>
-        <select name="genero" id="genero" required>
-            {% for genero in generos %}
-            <option value="{{ genero[0] }}">{{ genero[1] }}</option>
-            {% endfor %}
-        </select>
-    
-        <label for="pais_origem">País de Origem:</label>
-        <input type="text" name="pais_origem" id="pais_origem" required>
-    
-        <label for="estoque">Quantidade em Estoque:</label>
-        <input type="number" name="estoque" id="estoque" required>
-    
-        <label for="preco">Preço (R$):</label>
-        <input type="number" name="preco" id="preco" step="0.01" required>
-    
-        <button type="submit">Adicionar Livro</button>
-    </form>
-    
+    <nav>
+        <a href="gerente_dashboard">Início</a>
+        <a style="background-color: #052c25; color: white"href="cadastrar_livro">Livro</a>
+        <a href="cadastrar_autor">Autor</a>
+        <a href="cadastrar_editora">Editora</a>
+        <a href="cadastrar_genero">Gênero</a>
+    </nav>
+    <main class="Cadastro">
+        <div class="cad_titulo">
+            <h1>Livro</h1>
+        </div>
+        <div class="formulario">
+            <form method="POST" action="{{ url_for('cadastrar_livro') }}" id="cadastro_livros">
+                <label for="titulo">Título do Livro:</label>
+                <input type="text" name="titulo" id="titulo" required>
+            
+                <div id="liv-p-i-a">
+                    <div id="pais">
+                        <label for="pais_origem">País de Origem:</label>
+                        <input type="text" name="pais_origem" id="pais_origem" required>
+                    </div>
+                    <div id="disbn">
+                        <label for="isbn">ISBN:</label>
+                        <input type="text" name="isbn" id="isbn" required>
+                    </div>
+                    <div id="dano">
+                        <label for="ano">Ano de Publicação:</label>
+                        <input type="number" name="ano" id="ano" required>
+                    </div>
+                </div>
+                <div id="liv-sel-q-p">
+                    <div class="select">
+                        <label for="autor">Autor:</label>
+                        <select name="autor" id="autor" required>
+                            {% for autor in autores %}
+                            <option value="{{ autor[0] }}">{{ autor[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    
+                        <label for="editora">Editora:</label>
+                        <select name="editora" id="editora" required>
+                            {% for editora in editoras %}
+                            <option value="{{ editora[0] }}">{{ editora[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    
+                        <label for="genero">Gênero:</label>
+                        <select name="genero" id="genero" required>
+                            {% for genero in generos %}
+                            <option value="{{ genero[0] }}">{{ genero[1] }}</option>
+                            {% endfor %}
+                        </select> 
+                    </div>
+
+                    <div id="q-p">
+                        <div id="qnt">
+                            <label for="estoque">Quantidade em Estoque:</label>
+                            <input type="number" name="estoque" id="estoque" required>
+                        </div>
+                        <div id="preco">
+                            <label for="preco">Preço (R$):</label>
+                            <input type="number" name="preco" id="preco" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit">Adicionar Livro</button>
+            </form> 
+        </div>   
+    </main>
 </body>
 </html>

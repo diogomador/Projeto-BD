@@ -23,21 +23,8 @@ def is_email_taken(email):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Verifica se o usuário está logado
-        if not session.get('logged_in') or session.get('gerente_id') is None:
-            return redirect(url_for('login_gerente'))  # Redirecionar para a página de login de gerentes
-
-        # Consulta o banco de dados para verificar se o e-mail está na tabela de gerentes
-        email = session.get('email')
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM tb_gerente WHERE ger_email = %s", (email,))
-        gerente = cursor.fetchone()
-        cursor.close()
-
-        # Se o gerente não for encontrado, redireciona
-        if not gerente:
-            return redirect(url_for('login_gerente'))
-
+        if not session.get('logged_in') or session.get('gerente_id') is None or session.get('email') != 'admin@biblioteca.com':
+            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -198,7 +185,6 @@ def cliente_dashboard():
     return render_template('cliente_dashboard.html', emprestimos=emprestimos_com_livros)
 
 @app.route('/admin_dashboard')
-@admin_required
 def admin_dashboard():
     if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
@@ -248,11 +234,30 @@ def adicionar_gerente():
     return render_template('admin_dashboard.html')
 
 @app.route('/gerente_dashboard')
-@admin_required
 def gerente_dashboard():
     if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
-    return render_template('gerente_dashboard.html')
+    
+    cursor = mysql.connection.cursor()
+
+    #Pegando Informações
+    cursor.execute(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM tb_livro) AS total_livros,
+            (SELECT COUNT(*) FROM tb_autor) AS total_autores,
+            (SELECT COUNT(*) FROM tb_genero) AS total_generos,
+            (SELECT COUNT(*) FROM tb_editora) AS total_editoras
+        """ 
+    )
+
+    info = cursor.fetchone()
+    cursor.close()
+    return render_template('gerente_dashboard.html',
+                            total_livros = info[0],
+                            total_autores = info[1],
+                            total_generos =info[2],
+                            total_editoras = info[3])
 
 @app.route('/editar', methods=['GET', 'POST'])
 def editar():
@@ -338,7 +343,6 @@ def excluir():
     return redirect(url_for('index'))
 
 @app.route('/cadastrar_autor', methods=['GET', 'POST'])
-@admin_required
 def cadastrar_autor():
     if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
@@ -366,7 +370,6 @@ def cadastrar_autor():
 
 
 @app.route('/cadastrar_editora', methods=['GET', 'POST'])
-@admin_required
 def cadastrar_editora():
     if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
@@ -394,7 +397,6 @@ def cadastrar_editora():
 
 
 @app.route('/cadastrar_genero', methods=['GET', 'POST'])
-@admin_required
 def cadastrar_genero():
     if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login'))
@@ -421,7 +423,6 @@ def cadastrar_genero():
     return render_template('cadastrar_genero.html')
 
 @app.route('/cadastrar_livro', methods=['GET', 'POST'])
-@admin_required
 def cadastrar_livro():
     if not session.get('logged_in') or not session.get('gerente_id'):
         return redirect(url_for('login_gerente'))
@@ -542,9 +543,8 @@ def emprestimo():
 
 # Listagem de usuários com ordenação
 @app.route('/listar_clientes', methods=['GET'])
-@admin_required
 def listar_clientes():
-    ordem = request.args.get('ordem', 'asc')  # 'asc' ou 'desc'
+    ordem = request.args.get('ordem', 'asc')  # 'asc' para crescente, 'desc' para decrescente
     try:
         cursor = mysql.connection.cursor()
         cursor.execute(f"SELECT cli_id, cli_nome, cli_email FROM tb_cliente ORDER BY cli_nome {ordem.upper()}")
@@ -557,16 +557,21 @@ def listar_clientes():
 
 # Listagem de livros com ordenação
 @app.route('/listar_livros', methods=['GET'])
-@admin_required
 def listar_livros():
     ordem = request.args.get('ordem', 'asc')  # 'asc' ou 'desc'
     try:
         cursor = mysql.connection.cursor()
+        # Ajustar a consulta para incluir os campos corretos
         cursor.execute(f"""
-            SELECT liv_id, liv_titulo, liv_aut_id, liv_gen_id, liv_estoque, liv_preco 
+            SELECT 
+                liv_titulo AS titulo, 
+                liv_autor AS autor, 
+                liv_genero AS genero, 
+                liv_disponivel AS disponivel 
             FROM tb_livro 
             ORDER BY liv_titulo {ordem.upper()}
         """)
+        # Fetchall retorna uma lista de dicionários
         livros = cursor.fetchall()
         cursor.close()
         return render_template('listar_livros.html', livros=livros, ordem=ordem)
@@ -577,17 +582,15 @@ def listar_livros():
 
 # Listagem de empréstimos com ordenação
 @app.route('/listar_emprestimos', methods=['GET'])
-@admin_required
 def listar_emprestimos():
     ordem = request.args.get('ordem', 'asc')  # 'asc' ou 'desc'
     try:
         cursor = mysql.connection.cursor()
         cursor.execute(f"""
-            SELECT emp_id, emp_data_ini, emp_dev, emp_total, cli_nome, liv_titulo 
+            SELECT emp_id, emp_data_ini, emp_dev, emp_total, cli_nome, liv_titulo
             FROM tb_emprestimo
             INNER JOIN tb_cliente ON tb_emprestimo.emp_cli_id = tb_cliente.cli_id
-            INNER JOIN tb_emprestimo_livro ON tb_emprestimo.emp_id = tb_emprestimo_livro.eml_emp_id
-            INNER JOIN tb_livro ON tb_emprestimo_livro.eml_liv_id = tb_livro.liv_id
+            INNER JOIN tb_livro ON tb_emprestimo.emp_liv_id = tb_livro.liv_id
             ORDER BY emp_data_ini {ordem.upper()}
         """)
         emprestimos = cursor.fetchall()
@@ -598,61 +601,58 @@ def listar_emprestimos():
         return redirect(url_for('gerente_dashboard'))
 
 # Total de empréstimos em reais por usuário
-@app.route('/relatorio_emprestimos_cliente', methods=['GET'])
-@admin_required
-def relatorio_emprestimos_cliente():
-    try:
-        cursor = mysql.connection.cursor()
-        cursor.execute("""
-            SELECT cli.cli_nome, 
-                   COUNT(emp.emp_id) AS total_emprestimos,
-                   ROUND(SUM(emp.emp_total), 2) AS total_valor
-            FROM tb_cliente cli
-            LEFT JOIN tb_emprestimo emp ON cli.cli_id = emp.emp_cli_id
-            GROUP BY cli.cli_id
-            ORDER BY total_emprestimos DESC
-        """)
-        relatorio = cursor.fetchall()
-        cursor.close()
-        return render_template('relatorio_emprestimos_cliente.html', relatorio=relatorio)
-    except Exception as e:
-        flash(f'Erro ao gerar relatório: {e}', 'danger')
-        return redirect(url_for('gerente_dashboard'))
+@app.route('/relatorio_emprestimos_usuario', methods=['POST', 'GET'])
+def relatorio_emprestimos_usuario():
+    if request.method == 'POST':
+        usuario_id = request.form.get('usuario_id')
+        data_inicio = request.form.get('data_inicio')
+        data_fim = request.form.get('data_fim')
+        try:
+            cursor = mysql.connection.cursor()
+            cursor.execute("""
+                SELECT SUM(emp_valor) 
+                FROM tb_emprestimo 
+                WHERE emp_usu_id = %s AND emp_data BETWEEN %s AND %s
+            """, (usuario_id, data_inicio, data_fim))
+            total = cursor.fetchone()[0] or 0
+            cursor.close()
+            return render_template('relatorio_emprestimos_usuario.html', total=total)
+        except Exception as e:
+            flash(f'Erro ao gerar relatório: {e}', 'danger')
+            return redirect(url_for('gerente_dashboard'))
+    return render_template('relatorio_emprestimos_usuario.html')
 
 # Usuários com empréstimos acima de R$100,00
-@app.route('/clientes_acima_cem', methods=['GET'])
-@admin_required
-def clientes_acima_cem():
+@app.route('/usuarios_acima_cem', methods=['GET'])
+def usuarios_acima_cem():
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            SELECT cli.cli_nome, SUM(emp.emp_total) AS total
-            FROM tb_cliente cli
-            INNER JOIN tb_emprestimo emp ON cli.cli_id = emp.emp_cli_id
-            GROUP BY cli.cli_id
+            SELECT usu_nome, SUM(emp_valor) AS total
+            FROM tb_emprestimo
+            INNER JOIN tb_usuario ON tb_emprestimo.emp_usu_id = tb_usuario.usu_id
+            GROUP BY emp_usu_id
             HAVING total > 100
         """)
-        clientes = cursor.fetchall()
+        usuarios = cursor.fetchall()
         cursor.close()
-        return render_template('clientes_acima_cem.html', clientes=clientes)
+        return render_template('usuarios_acima_cem.html', usuarios=usuarios)
     except Exception as e:
         flash(f'Erro ao gerar relatório: {e}', 'danger')
         return redirect(url_for('gerente_dashboard'))
 
 # Top 10 livros mais pedidos
 @app.route('/top_livros', methods=['GET'])
-@admin_required
 def top_livros():
     dias = request.args.get('dias', 30)
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            SELECT liv_titulo, COUNT(eml_id) AS pedidos
-            FROM tb_emprestimo_livro
-            INNER JOIN tb_livro ON tb_emprestimo_livro.eml_liv_id = tb_livro.liv_id
-            INNER JOIN tb_emprestimo ON tb_emprestimo_livro.eml_emp_id = tb_emprestimo.emp_id
-            WHERE emp_data_ini >= DATE_SUB(CURDATE(), INTERVAL %s DAY)
-            GROUP BY tb_emprestimo_livro.eml_liv_id
+            SELECT liv_titulo, COUNT(emp_id) AS pedidos
+            FROM tb_emprestimo
+            INNER JOIN tb_livro ON tb_emprestimo.emp_liv_id = tb_livro.liv_id
+            WHERE emp_data >= DATE_SUB(CURDATE(), INTERVAL %s DAY)
+            GROUP BY emp_liv_id
             ORDER BY pedidos DESC
             LIMIT 10
         """, (dias,))
@@ -665,7 +665,6 @@ def top_livros():
 
 # Livros não emprestados
 @app.route('/livros_nao_emprestados', methods=['GET'])
-@admin_required
 def livros_nao_emprestados():
     dias = request.args.get('dias', 30)
     try:
@@ -674,10 +673,9 @@ def livros_nao_emprestados():
             SELECT liv_titulo
             FROM tb_livro
             WHERE liv_id NOT IN (
-                SELECT DISTINCT eml_liv_id 
-                FROM tb_emprestimo_livro
-                INNER JOIN tb_emprestimo ON tb_emprestimo_livro.eml_emp_id = tb_emprestimo.emp_id
-                WHERE emp_data_ini >= DATE_SUB(CURDATE(), INTERVAL %s DAY)
+                SELECT DISTINCT emp_liv_id 
+                FROM tb_emprestimo
+                WHERE emp_data >= DATE_SUB(CURDATE(), INTERVAL %s DAY)
             )
         """, (dias,))
         livros = cursor.fetchall()

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +7,25 @@
 </head>
 <body>
     <h1>Lista de Empréstimos</h1>
-    <table>
+    <table border="1">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Data Inicial</th>
-                <th>Data de Devolução</th>
-                <th>Total</th>
-                <th>Cliente</th>
+                <th>Usuário</th>
                 <th>Livro</th>
+                <th>Data de Empréstimo</th>
+                <th>Data de Devolução</th>
             </tr>
         </thead>
         <tbody>
             {% for emprestimo in emprestimos %}
             <tr>
-                <td>{{ emprestimo[0] }}</td>
-                <td>{{ emprestimo[1] }}</td>
-                <td>{{ emprestimo[2] }}</td>
-                <td>{{ emprestimo[3] }}</td>
-                <td>{{ emprestimo[4] }}</td>
-                <td>{{ emprestimo[5] }}</td>
+                <td>{{ emprestimo.usuario }}</td>
+                <td>{{ emprestimo.livro }}</td>
+                <td>{{ emprestimo.data_emprestimo }}</td>
+                <td>{{ emprestimo.data_devolucao }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>

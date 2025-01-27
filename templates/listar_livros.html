@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +7,25 @@
 </head>
 <body>
     <h1>Lista de Livros</h1>
-    <table>
+    <table border="1">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Título</th>
                 <th>Autor</th>
                 <th>Gênero</th>
-                <th>Estoque</th>
-                <th>Preço</th>
+                <th>Disponibilidade</th>
             </tr>
         </thead>
         <tbody>
             {% for livro in livros %}
             <tr>
-                <td>{{ livro[0] }}</td>
-                <td>{{ livro[1] }}</td>
-                <td>{{ livro[2] }}</td>
-                <td>{{ livro[3] }}</td>
-                <td>{{ livro[4] }}</td>
-                <td>{{ livro[5] }}</td>
+                <td>{{ livro.titulo }}</td>
+                <td>{{ livro.autor }}</td>
+                <td>{{ livro.genero }}</td>
+                <td>{{ 'Disponível' if livro.disponivel else 'Emprestado' }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>

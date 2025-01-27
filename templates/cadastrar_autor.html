@@ -1,16 +1,30 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cadastrosgerais.css') }}">
     <title>Cadastrar Autor</title>
 </head>
 <body>
-    <h1>Cadastrar Autor</h1>
-    <form method="POST" action="{{ url_for('cadastrar_autor') }}">
-        <label for="autor_nome">Nome do Autor:</label>
-        <input type="text" name="autor_nome" id="autor_nome" required>
-        <button type="submit">Cadastrar Autor</button>
-    </form>
+    <nav>
+        <a href="gerente_dashboard">Início</a>
+        <a href="cadastrar_livro">Livro</a>
+        <a style="background-color: #052c25; color: white" href="cadastrar_autor">Autor</a>
+        <a href="cadastrar_editora">Editora</a>
+        <a href="cadastrar_genero">Gênero</a>
+    </nav>
+    <main class="Cadastro">
+        <div class="cad_titulo">
+            <h1>Autor</h1>
+        </div>
+        <div class="formulario">
+            <form method="POST" action="{{ url_for('cadastrar_autor') }}" id="cadastro_autor">
+                <label for="autor_nome">Nome do Autor:</label>
+                <input type="text" name="autor_nome" id="autor_nome" required>
+                <button type="submit">Cadastrar Autor</button>
+            </form>
+        </div>
+    </main>
 </body>
 </html>

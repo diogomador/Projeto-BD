@@ -1,24 +1,23 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livros Não Emprestados</title>
+    <title>Relatório de Empréstimos por Usuário</title>
 </head>
 <body>
-    <h1>Livros Nunca Emprestados</h1>
+    <h1>Relatório de Empréstimos por Usuário</h1>
     <table border="1">
         <thead>
             <tr>
-                <th>Título</th>
-                <th>Autor</th>
+                <th>Usuário</th>
+                <th>Quantidade de Empréstimos</th>
             </tr>
         </thead>
         <tbody>
-            {% for livro in livros_nao_emprestados %}
+            {% for usuario, quantidade in relatorio %}
             <tr>
-                <td>{{ livro.titulo }}</td>
-                <td>{{ livro.autor }}</td>
+                <td>{{ usuario }}</td>
+                <td>{{ quantidade }}</td>
             </tr>
             {% endfor %}
         </tbody>

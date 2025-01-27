@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livros Não Emprestados</title>
+    <title>Usuários com Mais de 100 Empréstimos</title>
 </head>
 <body>
-    <h1>Livros Nunca Emprestados</h1>
+    <h1>Usuários com Mais de 100 Empréstimos</h1>
     <table border="1">
         <thead>
             <tr>
-                <th>Título</th>
-                <th>Autor</th>
+                <th>Usuário</th>
+                <th>Quantidade de Empréstimos</th>
             </tr>
         </thead>
         <tbody>
-            {% for livro in livros_nao_emprestados %}
+            {% for usuario, quantidade in usuarios_acima_cem %}
             <tr>
-                <td>{{ livro.titulo }}</td>
-                <td>{{ livro.autor }}</td>
+                <td>{{ usuario }}</td>
+                <td>{{ quantidade }}</td>
             </tr>
             {% endfor %}
         </tbody>

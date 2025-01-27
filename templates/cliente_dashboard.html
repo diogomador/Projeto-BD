@@ -1,38 +1,26 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard do Cliente</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
-    <style>
-        div {
-            border: 1px solid black
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='cliente.css') }}">
+    <title>Cadastrar Editora</title>
 </head>
 <body>
-    <h1>Meus Empréstimos</h1>
-    {% for item in emprestimos %}
-    <div class="emprestimo-container">
-        <h2>Empréstimo #{{ item.emprestimo[0] }}</h2>
-        <p>Data de Início: {{ item.emprestimo[1] }}</p>
-        <p>Data de Devolução: {{ item.emprestimo[2] }}</p>
-        <p>Status: {{ item.emprestimo[3] }}</p>
-        <p>Total: R$ {{ item.emprestimo[4] }}</p>
-        <h3>Livros:</h3>
-        <ul>
-            {% for livro in item.livros %}
-            <li>
-                {{ livro[0] }} - Quantidade: {{ livro[1] }} - Preço: R$ {{ livro[2] }}
-            </li>
-            {% endfor %}
-        </ul>
-        <form action="{{url_for('devolver', emp_id=item.emprestimo[0])}}" method="post">
-            <button type="submit">Devolver</button>
-        </form>
-    </div>
-    {% endfor %}
-    <a href="{{ url_for('emprestimo') }}">Realizar Emprestimo</a>
+    <main class="conteudo">
+        <div class="cad_titulo">
+            <h1>Bem-Vindo, {{session['nome']}}</h1>
+        </div>
+        <aside>
+            <div id="cli-op">
+                <h1> O que você deseja fazer hoje?</h1>
+                <ul>
+                    <li><a href="{{ url_for('editar') }}">Editar Perfil</a></li>
+                    <li><a href="{{ url_for('emprestimo') }}">Fazer Empréstimo</a></li>
+                    <li><a href="{{ url_for('index') }}">Sair</a></li>
+                </ul>
+            </div>
+        </aside>
+    </main>
 </body>
 </html>
