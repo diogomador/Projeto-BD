@@ -145,8 +145,8 @@ aside{
     flex-direction: column;
     justify-content: center;
     background-color: #f9f9f9;
-    width: 45vw; /* Ajuste a largura conforme necessário */
-    height: 40vh; /* Altura automática para caber o conteúdo */
+    width: 50vw; /* Ajuste a largura conforme necessário */
+    height: 45vh; /* Altura automática para caber o conteúdo */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 1rem; /* Adiciona um padding para melhor espaçamento */

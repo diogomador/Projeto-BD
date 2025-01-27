@@ -1,28 +1,41 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório de Empréstimos por Usuário</title>
+    <title>Relatório de Empréstimos por Cliente</title>
 </head>
 <body>
+    <h1>Relatório de Empréstimos por Cliente</h1>
+    <form method="POST">
+        <label for="data_inicio">Data Início:</label>
+        <input type="date" id="data_inicio" name="data_inicio" required>
+        <label for="data_fim">Data Fim:</label>
+        <input type="date" id="data_fim" name="data_fim" required>
+        <button type="submit">Gerar Relatório</button>
+    </form>
+
+    {% if relatorio %}
+    <h2>Resultado:</h2>
     <table>
         <thead>
             <tr>
                 <th>Nome do Cliente</th>
                 <th>Total de Empréstimos</th>
-                <th>Total Valor</th>
+                <th>Total em Reais</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in relatorio %}
+            {% for cliente in relatorio %}
             <tr>
-                <td>{{ item[0] }}</td>
-                <td>{{ item[1] }}</td>
-                <td>{{ item[2] }}</td>
+                <td>{{ cliente[0] }}</td>
+                <td>{{ cliente[1] }}</td>
+                <td>R$ {{ cliente[2] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
     <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>

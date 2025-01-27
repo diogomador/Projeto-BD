@@ -26,9 +26,10 @@
                     <li><a href="{{ url_for('listar_emprestimos') }}">Listar Empréstimos</a></li>
                     <li><a href="{{ url_for('top_livros') }}">Top Livros Pedidos</a></li>
                     <li><a href="{{ url_for('livros_nao_emprestados') }}">Livros Não Emprestados</a></li>
+                    <li><a href="{{ url_for('relatorio_emprestimos_cliente') }}">Total de Empréstimos por Cliente</a></li>
+                    <li><a href="{{ url_for('clientes_acima_cem') }}">Clientes Acima de R$100</a></li>
                 </ul>
             </div>
-
 
             <form action="{{ url_for('index') }}" method="get" id="sair">
                 <button id="but_sair" type="submit">Sair</button>

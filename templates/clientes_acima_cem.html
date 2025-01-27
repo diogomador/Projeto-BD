@@ -1,30 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuários com Mais de 100 Empréstimos</title>
+    <title>Clientes com Empréstimos Acima de R$100</title>
 </head>
 <body>
+    <h1>Clientes com Empréstimos Acima de R$100</h1>
+    <form method="POST">
+        <label for="data_inicio">Data Início:</label>
+        <input type="date" id="data_inicio" name="data_inicio" required>
+        <label for="data_fim">Data Fim:</label>
+        <input type="date" id="data_fim" name="data_fim" required>
+        <button type="submit">Listar Clientes</button>
+    </form>
+
+    {% if clientes %}
+    <h2>Resultado:</h2>
     <table>
         <thead>
             <tr>
                 <th>Nome do Cliente</th>
-                <th>Total</th>
+                <th>Total em Reais</th>
             </tr>
         </thead>
         <tbody>
             {% for cliente in clientes %}
             <tr>
                 <td>{{ cliente[0] }}</td>
-                <td>{{ cliente[1] | format('%.2f') }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="2">Nenhum cliente encontrado.</td>
+                <td>R$ {{ cliente[1] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
+    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>

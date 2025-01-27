@@ -1,31 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listar Empréstimos</title>
+    <title>Lista de Empréstimos</title>
 </head>
 <body>
     <h1>Lista de Empréstimos</h1>
-    <table border="1">
+    <table>
         <thead>
             <tr>
-                <th>Usuário</th>
-                <th>Livro</th>
-                <th>Data de Empréstimo</th>
+                <th>ID</th>
+                <th>Nome do Cliente</th>
+                <th>Título do Livro</th>
+                <th>
+                    <a href="{{ url_for('listar_emprestimos', ordem='asc') }}">▲</a>
+                        Data de Empréstimo
+                    <a href="{{ url_for('listar_emprestimos', ordem='desc') }}">▼</a>
+                </th>
                 <th>Data de Devolução</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
             </tr>
         </thead>
         <tbody>
             {% for emprestimo in emprestimos %}
             <tr>
-                <td>{{ emprestimo.usuario }}</td>
-                <td>{{ emprestimo.livro }}</td>
-                <td>{{ emprestimo.data_emprestimo }}</td>
-                <td>{{ emprestimo.data_devolucao }}</td>
+                <td>{{ emprestimo[0] }}</td>
+                <td>{{ emprestimo[1] }}</td>
+                <td>{{ emprestimo[2] }}</td>
+                <td>{{ emprestimo[3] }}</td>
+                <td>{{ emprestimo[4] }}</td>
+                <td>{{ emprestimo[5] }}</td>
+                <td>{{ emprestimo[6] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>

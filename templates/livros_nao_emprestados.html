@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Livros Não Emprestados</title>
 </head>
 <body>
-    <h1>Livros Nunca Emprestados</h1>
-    <table border="1">
+    <h1>Livros Não Emprestados</h1>
+    <table>
         <thead>
             <tr>
-                <th>Título</th>
-                <th>Autor</th>
+                <th>ID</th>
+                <th>Título do Livro</th>
             </tr>
         </thead>
         <tbody>
-            {% for livro in livros_nao_emprestados %}
+            {% for livro in livros %}
             <tr>
-                <td>{{ livro.titulo }}</td>
-                <td>{{ livro.autor }}</td>
+                <td>{{ livro[0] }}</td>
+                <td>{{ livro[1] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>

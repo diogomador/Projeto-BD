@@ -1,27 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Top Livros</title>
 </head>
 <body>
-    <h1>Top Livros Mais Emprestados</h1>
-    <table border="1">
+    <h1>Top Livros</h1>
+    <form method="GET">
+        <label for="dias">Últimos:</label>
+        <select name="dias" id="dias">
+            <option value="7">7 dias</option>
+            <option value="30" selected>30 dias</option>
+            <option value="60">60 dias</option>
+            <option value="90">90 dias</option>
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+
+    {% if top_livros %}
+    <table>
         <thead>
             <tr>
-                <th>Livro</th>
-                <th>Quantidade de Empréstimos</th>
+                <th>ID</th>
+                <th>Título do Livro</th>
+                <th>Total de Empréstimos</th>
             </tr>
         </thead>
         <tbody>
-            {% for livro, quantidade in top_livros %}
+            {% for livro in top_livros %}
             <tr>
-                <td>{{ livro }}</td>
-                <td>{{ quantidade }}</td>
+                <td>{{ livro[0] }}</td>
+                <td>{{ livro[1] }}</td>
+                <td>{{ livro[2] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 </body>
 </html>
