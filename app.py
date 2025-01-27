@@ -152,7 +152,37 @@ def login_gerente():
 def cliente_dashboard():
     if not session.get('logged_in') or not session.get('user_id'):
         return redirect(url_for('login_cliente'))
-    return render_template('cliente_dashboard.html')
+    
+    user_id = session['user_id']
+
+    # Consulta os empréstimos do usuário
+    cursor = mysql.connection.cursor()
+    cursor.execute("""
+        SELECT emp_id, emp_data_ini, emp_dev, emp_status, emp_total 
+        FROM tb_emprestimo 
+        WHERE emp_cli_id = %s 
+        ORDER BY emp_data_ini DESC
+    """, (user_id,))
+    emprestimos = cursor.fetchall()
+
+    # Consulta os livros associados a cada empréstimo
+    emprestimos_com_livros = []
+    for emprestimo in emprestimos:
+        cursor.execute("""
+            SELECT l.liv_titulo, el.eml_quantidade, el.eml_preco 
+            FROM tb_emprestimo_livro el
+            JOIN tb_livro l ON el.eml_liv_id = l.liv_id
+            WHERE el.eml_emp_id = %s
+        """, (emprestimo[0],))
+        livros = cursor.fetchall()
+        emprestimos_com_livros.append({
+            'emprestimo': emprestimo,
+            'livros': livros
+        })
+
+    cursor.close()
+
+    return render_template('cliente_dashboard.html', emprestimos=emprestimos_com_livros)
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
@@ -646,3 +676,47 @@ def livros_nao_emprestados():
     except Exception as e:
         flash(f'Erro ao gerar relatório: {e}', 'danger')
         return redirect(url_for('gerente_dashboard'))
+
+
+@app.route("/devolver/<int:emp_id>", methods=["POST"])
+def devolver(emp_id):
+    cursor = mysql.connection.cursor()
+
+    # Verificação do status do empréstimo
+    cursor.execute("""
+        SELECT emp_status 
+        FROM tb_emprestimo 
+        WHERE emp_id = %s AND emp_cli_id = %s
+    """, (emp_id, session['user_id']))
+    resultado = cursor.fetchone()
+    
+    if not resultado or resultado[0] == 'Finalizado':
+        # Interrompe o processo, caso o empréstimo já tenha sido finalizado
+        return redirect(url_for("cliente_dashboard"))
+
+    # Busca os livros e atualiza o estoque
+    cursor.execute("""
+        SELECT eml_liv_id, eml_quantidade 
+        FROM tb_emprestimo_livro 
+        WHERE eml_emp_id = %s
+    """, (emp_id,))
+    livros = cursor.fetchall()
+
+    for livro_id, quantidade in livros:
+        cursor.execute("""
+            UPDATE tb_livro 
+            SET liv_estoque = liv_estoque + %s 
+            WHERE liv_id = %s
+        """, (quantidade, livro_id))
+
+    # Atualiza status
+    cursor.execute("""
+        UPDATE tb_emprestimo 
+        SET emp_status = 'Finalizado' 
+        WHERE emp_id = %s AND emp_cli_id = %s
+    """, (emp_id, session['user_id']))
+    
+    mysql.connection.commit()
+    cursor.close()
+
+    return redirect(url_for("cliente_dashboard"))
