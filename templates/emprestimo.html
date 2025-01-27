@@ -8,6 +8,7 @@
 </head>
 <body>
     <h1>Realizar Empréstimos de Livros</h1>
+    <a href="{{ url_for('cliente_dashboard') }}">Voltar ao Dashboard</a>
     <form id="emprestimoForm" method="POST" action="{{url_for('emprestimo')}}">
         {% for livro in livros %}
         <div class="livro-container">

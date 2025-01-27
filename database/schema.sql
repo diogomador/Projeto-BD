@@ -94,3 +94,64 @@ CREATE TABLE tb_emprestimo_livro (
 -- Login do Admin Inicial
 INSERT INTO tb_gerente (ger_codigo, ger_nome, ger_telefone, ger_email, ger_senha)
 VALUES (1, 'Administrador', '40028922', 'admin@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2');
+-- Inserindo Gerentes
+INSERT INTO tb_gerente (ger_codigo, ger_nome, ger_telefone, ger_email, ger_senha)
+VALUES 
+(1, 'Administrador', '40028922', 'admin@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2'),
+(2, 'Gerente 1', '40028923', 'gerente1@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2');
+
+-- Inserindo Clientes
+INSERT INTO tb_cliente (cli_nome, cli_telefone, cli_email, cli_senha)
+VALUES 
+('Cliente 1', '40028924', 'cliente1@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2'),
+('Cliente 2', '40028925', 'cliente2@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2'),
+('Cliente 3', '40028926', 'cliente3@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2');
+
+-- Inserindo Endereços
+INSERT INTO tb_endereco (end_cli_id, end_estado, end_cidade, end_bairro, end_rua, end_numero)
+VALUES 
+(1, 'SP', 'São Paulo', 'Bairro 1', 'Rua 1', '100'),
+(2, 'RJ', 'Rio de Janeiro', 'Bairro 2', 'Rua 2', '200'),
+(3, 'MG', 'Belo Horizonte', 'Bairro 3', 'Rua 3', '300');
+
+-- Inserindo Autores
+INSERT INTO tb_autor (aut_nome)
+VALUES 
+('Autor 1'),
+('Autor 2'),
+('Autor 3');
+
+-- Inserindo Editoras
+INSERT INTO tb_editora (edi_nome)
+VALUES 
+('Editora 1'),
+('Editora 2'),
+('Editora 3');
+
+-- Inserindo Gêneros
+INSERT INTO tb_genero (gen_nome)
+VALUES 
+('Ficção'),
+('Não-Ficção'),
+('Fantasia');
+
+-- Inserindo Livros
+INSERT INTO tb_livro (liv_titulo, liv_isbn, liv_ano, liv_aut_id, liv_edi_id, liv_gen_id, liv_pais_origem, liv_estoque, liv_preco, liv_ger_id)
+VALUES 
+('Livro 1', '1234567890123', 2020, 1, 1, 1, 'Brasil', 10, 29.99, 1),
+('Livro 2', '1234567890124', 2021, 2, 2, 2, 'Brasil', 5, 39.99, 1),
+('Livro 3', '1234567890125', 2022, 3, 3, 3, 'Brasil', 0, 49.99, 1);
+
+-- Inserindo Empréstimos
+INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_dev, emp_total, emp_status)
+VALUES 
+(1, '2023-01-01', '2023-01-15', 59.98, 'Ativo'),
+(2, '2023-01-10', '2023-01-20', 29.99, 'Ativo'),
+(3, '2023-01-15', NULL, 0, 'Ativo');
+
+-- Inserindo Empréstimos-Livros
+INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
+VALUES 
+(1, 1, 2, 59.98),
+(2, 2, 1, 29.99),
+(3, 3, 1, 49.99);

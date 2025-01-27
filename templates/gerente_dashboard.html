@@ -17,5 +17,16 @@
         <li><a href="{{ url_for('cadastrar_editora') }}">Cadastrar Editora</a></li>
         <li><a href="{{ url_for('cadastrar_genero') }}">Cadastrar Gênero</a></li>
     </ul>
+
+    <h2>Consultas</h2>
+    <ul>
+        <li><a href="{{ url_for('listar_clientes') }}">Listar Clientes</a></li>
+        <li><a href="{{ url_for('listar_emprestimos') }}">Listar Emprestimos</a></li>
+        <li><a href="{{ url_for('listar_livros') }}">Listar Livros</a></li>
+        <li><a href="{{ url_for('livros_nao_emprestados') }}">Livros Disponíveis</a></li>
+        <li><a href="{{ url_for('relatorio_emprestimos_cliente') }}"> Relatório Emprestimos</a></li>
+        <li><a href="{{ url_for('top_livros') }}">Top Livros</a></li>
+        <li><a href="{{ url_for('clientes_acima_cem') }}"> Clientes acima de cem</a></li>
+    </ul>
 </body>
 </html>

@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Livros</title>
+    <title>Top 10 Livros</title>
 </head>
 <body>
-    <h1>Top Livros Mais Emprestados</h1>
-    <table border="1">
+    <h1>Top 10 Livros Mais Pedidos</h1>
+    <table>
         <thead>
             <tr>
-                <th>Livro</th>
-                <th>Quantidade de Empréstimos</th>
+                <th>Título</th>
+                <th>Pedidos</th>
             </tr>
         </thead>
         <tbody>
-            {% for livro, quantidade in top_livros %}
+            {% for livro in livros %}
             <tr>
-                <td>{{ livro }}</td>
-                <td>{{ quantidade }}</td>
+                <td>{{ livro[0] }}</td>
+                <td>{{ livro[1] }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
 </body>
 </html>
