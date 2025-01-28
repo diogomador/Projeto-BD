@@ -24,23 +24,29 @@ def is_email_taken(email):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Verifica se o usuário está logado
-        if not session.get('logged_in') or session.get('gerente_id') is None:
-            return redirect(url_for('login_gerente'))  # Redirecionar para a página de login de gerentes
+        # Verifica se o usuário está logado e se ele é um gerente
+        if not session.get('logged_in'):
+            return redirect(url_for('login_gerente'))  # Redireciona para a página de login se não estiver logado
+        
+        # Verifica se o usuário tem o 'gerente_id' na sessão
+        if not session.get('gerente_id'):
+            return redirect(url_for('login_cliente'))  # Redireciona se não for gerente
 
-        # Consulta o banco de dados para verificar se o e-mail está na tabela de gerentes
+        # Consulta o banco de dados para verificar se o gerente é válido
         email = session.get('email')
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT * FROM tb_gerente WHERE ger_email = %s", (email,))
         gerente = cursor.fetchone()
         cursor.close()
 
-        # Se o gerente não for encontrado, redireciona
+        # Se o gerente não for encontrado no banco de dados, redireciona
         if not gerente:
-            return redirect(url_for('login_gerente'))
+            return redirect(url_for('login_cliente'))
 
         return f(*args, **kwargs)
     return decorated_function
+
+
 
 @app.route('/')
 def index():
@@ -101,6 +107,7 @@ def cadastro():
 
 @app.route('/login_cliente', methods=['GET', 'POST'])
 def login_cliente():
+    session.clear()
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
@@ -132,6 +139,7 @@ def login_cliente():
 
 @app.route('/login_gerente', methods=['GET', 'POST'])
 def login_gerente():
+    session.clear()
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
@@ -823,3 +831,8 @@ def devolver(emp_id):
     cursor.close()
 
     return redirect(url_for("cliente_dashboard"))
+
+@app.route('/logout')
+def logout():
+    session.clear()  # Limpa todos os dados da sessão
+    return redirect(url_for('login_cliente'))
