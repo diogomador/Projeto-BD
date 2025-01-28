@@ -180,31 +180,13 @@ def cliente_dashboard():
     # Consulta os empréstimos do usuário
     cursor = mysql.connection.cursor()
     cursor.execute("""
-        SELECT emp_id, emp_data_ini, emp_dev, emp_status, emp_total 
-        FROM tb_emprestimo 
-        WHERE emp_cli_id = %s 
-        ORDER BY emp_data_ini DESC
+        SELECT cli_nome
+        FROM tb_cliente 
+        WHERE cli_id = %s
     """, (user_id,))
-    emprestimos = cursor.fetchall()
+    cliente = cursor.fetchone()
 
-    # Consulta os livros associados a cada empréstimo
-    emprestimos_com_livros = []
-    for emprestimo in emprestimos:
-        cursor.execute("""
-            SELECT l.liv_titulo, el.eml_quantidade, el.eml_preco 
-            FROM tb_emprestimo_livro el
-            JOIN tb_livro l ON el.eml_liv_id = l.liv_id
-            WHERE el.eml_emp_id = %s
-        """, (emprestimo[0],))
-        livros = cursor.fetchall()
-        emprestimos_com_livros.append({
-            'emprestimo': emprestimo,
-            'livros': livros
-        })
-
-    cursor.close()
-
-    return render_template('cliente_dashboard.html', emprestimos=emprestimos_com_livros)
+    return render_template('cliente_dashboard.html', cliente=cliente)
 
 @app.route('/admin_dashboard')
 @admin_required
@@ -327,7 +309,7 @@ def editar():
         finally:
             cursor.close()
 
-        return redirect(url_for('editar'))
+        return redirect(url_for('cliente_dashboard'))
 
     cursor = mysql.connection.cursor()
     cursor.execute("""
@@ -508,48 +490,66 @@ def cadastrar_livro():
 @app.route('/emprestimo', methods=['GET', 'POST'])
 def emprestimo():
     if request.method == 'POST':
-        
-        duracao_dias = int(request.form.get('duracao'))
+        # Obtendo os dados do formulário
+        duracao_dias = int(request.form.get('duracao', 0))
         livros_ids = request.form.getlist('livros')
         quantidades = request.form.getlist('quantidades')
 
         if not livros_ids or not quantidades:
-            flash('Nenhum livro foi selecionado para empréstimo.', 'danger')
+            flash('Nenhum livro foi selecionado para o empréstimo.', 'danger')
             return redirect('/emprestimo')
 
         emprestimo_livros = []
         for livro_id, quantidade in zip(livros_ids, quantidades):
-            emprestimo_livros.append({
-                'livro_id': int(livro_id),
-                'quantidade': int(quantidade)
-            })
+            try:
+                emprestimo_livros.append({
+                    'livro_id': int(livro_id),
+                    'quantidade': int(quantidade)
+                })
+            except ValueError:
+                flash('Algum dos valores fornecidos é inválido.', 'danger')
+                return redirect('/emprestimo')
 
+        # Inicializa o cursor com o padrão do flask-mysqldb (não é necessário usar DictCursor)
         cursor = mysql.connection.cursor()
 
         total = 0
+
         for item in emprestimo_livros:
             cursor.execute("SELECT liv_preco, liv_estoque FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
             livro = cursor.fetchone()
 
-            if not livro or livro[1] < item['quantidade']:
-                flash(f'O livro "{item["livro_id"]}" não está disponível na quantidade solicitada. Estoque atual: {livro[1]}.', 'danger')
+            if not livro:
+                flash(f'O livro com ID "{item["livro_id"]}" não foi encontrado.', 'danger')
                 cursor.close()
                 return redirect('/emprestimo')
 
-            total += livro[0] * item['quantidade']
+            if livro[1] < item['quantidade']:  # A quantidade de estoque é o segundo item do resultado
+                flash(f'O livro "{item["livro_id"]}" não tem estoque suficiente. Estoque atual: {livro[1]}.', 'danger')
+                cursor.close()
+                return redirect('/emprestimo')
 
+            total += livro[0] * item['quantidade']  # Preço * quantidade
+
+        # Insere o empréstimo
         cursor.execute(
-            "INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_status, emp_total, emp_dev) VALUES (%s, NOW(), %s, %s, DATE_ADD(NOW(), INTERVAL %s DAY))",
+            """
+            INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_status, emp_total, emp_dev)
+            VALUES (%s, NOW(), %s, %s, DATE_ADD(NOW(), INTERVAL %s DAY))
+            """,
             (session['user_id'], 'Ativo', total, duracao_dias)
         )
         emprestimo_id = cursor.lastrowid
 
         for item in emprestimo_livros:
-            cursor.execute("SELECT liv_estoque FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
+            cursor.execute("SELECT liv_preco FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
             livro = cursor.fetchone()
 
             cursor.execute(
-                "INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco) VALUES (%s, %s, %s, %s)",
+                """
+                INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
+                VALUES (%s, %s, %s, %s)
+                """,
                 (emprestimo_id, item['livro_id'], item['quantidade'], item['quantidade'] * livro[0])
             )
             cursor.execute(
@@ -558,17 +558,26 @@ def emprestimo():
             )
 
         mysql.connection.commit()
-        mysql.connection.close()
+        cursor.close()
 
         flash('Empréstimo realizado com sucesso!', 'success')
         return redirect('/emprestimo')
 
+    # Método GET - Exibição dos livros
     cursor = mysql.connection.cursor()
-    cursor.execute("SELECT *, gen_nome, aut_nome FROM tb_livro JOIN tb_genero ON gen_id=liv_gen_id JOIN tb_autor ON aut_id=liv_aut_id")
+    cursor.execute("""
+        SELECT tb_livro.*, tb_genero.gen_nome, tb_autor.aut_nome
+        FROM tb_livro
+        JOIN tb_genero ON gen_id = liv_gen_id
+        JOIN tb_autor ON aut_id = liv_aut_id
+        WHERE liv_estoque > 0
+    """)
     livros = cursor.fetchall()
     cursor.close()
 
     return render_template('emprestimo.html', livros=livros)
+
+
 
 
 # Listagem de usuários com ordenação
@@ -830,9 +839,46 @@ def devolver(emp_id):
     mysql.connection.commit()
     cursor.close()
 
-    return redirect(url_for("cliente_dashboard"))
+    return redirect(url_for("gerenciar_emprestimos"))
 
 @app.route('/logout')
 def logout():
     session.clear()  # Limpa todos os dados da sessão
     return redirect(url_for('login_cliente'))
+
+
+@app.route('/gerenciar_emprestimos')
+def gerenciar_emprestimos():
+    if not session.get('logged_in') or not session.get('user_id'):
+        return redirect(url_for('login_cliente'))
+    
+    user_id = session['user_id']
+
+    # Consulta os empréstimos do usuário
+    cursor = mysql.connection.cursor()
+    cursor.execute("""
+        SELECT emp_id, emp_data_ini, emp_dev, emp_status, emp_total 
+        FROM tb_emprestimo 
+        WHERE emp_cli_id = %s 
+        ORDER BY emp_data_ini ASC
+    """, (user_id,))
+    emprestimos = cursor.fetchall()
+
+    # Consulta os livros associados a cada empréstimo
+    emprestimos_com_livros = []
+    for emprestimo in emprestimos:
+        cursor.execute("""
+            SELECT l.liv_titulo, el.eml_quantidade, el.eml_preco 
+            FROM tb_emprestimo_livro el
+            JOIN tb_livro l ON el.eml_liv_id = l.liv_id
+            WHERE el.eml_emp_id = %s
+        """, (emprestimo[0],))
+        livros = cursor.fetchall()
+        emprestimos_com_livros.append({
+            'emprestimo': emprestimo,
+            'livros': livros
+        })
+
+    cursor.close()
+
+    return render_template('gerenciar_emprestimos.html', emprestimos=emprestimos_com_livros)

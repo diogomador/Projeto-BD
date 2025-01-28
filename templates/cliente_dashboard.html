@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='cliente.css') }}">
-    <title>Cadastrar Editora</title>
+    <title>Dashboard do Cliente</title>
 </head>
 <body>
     <main class="conteudo">
         <div class="cad_titulo">
-            <h1>Bem-Vindo, {{session['nome']}}</h1>
+            <h1>Bem-Vindo, {{cliente[0]}}</h1>
         </div>
         <aside>
             <div id="cli-op">
@@ -17,6 +17,7 @@
                 <ul>
                     <li><a href="{{ url_for('editar') }}">Editar Perfil</a></li>
                     <li><a href="{{ url_for('emprestimo') }}">Fazer Empréstimo</a></li>
+                    <li><a href="{{ url_for('gerenciar_emprestimos') }}">Meus Empréstimos</a></li>
                     <li><a href="{{ url_for('logout') }}">Fazer Logout</a></li>
                 </ul>
             </div>

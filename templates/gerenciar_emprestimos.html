@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Empréstimos</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}"> -->
+    <style>
+        div {
+            border: 1px solid black
+        }
+    </style>
+</head>
+<body>
+    <h1>Meus Empréstimos</h1>
+    {% for item in emprestimos %}
+    <div class="emprestimo-container">
+        <h2>Empréstimo #{{ item.emprestimo[0] }}</h2>
+        <p>Data de Início: {{ item.emprestimo[1] }}</p>
+        <p>Data de Devolução: {{ item.emprestimo[2] }}</p>
+        <p>Status: {{ item.emprestimo[3] }}</p>
+        <p>Total: R$ {{ item.emprestimo[4] }}</p>
+        <h3>Livros:</h3>
+        <ul>
+            {% for livro in item.livros %}
+            <li>
+                {{ livro[0] }} - Quantidade: {{ livro[1] }} - Preço: R$ {{ livro[2] }}
+            </li>
+            {% endfor %}
+        </ul>
+        <form action="{{url_for('devolver', emp_id=item.emprestimo[0])}}" method="post">
+            <button type="submit">Devolver</button>
+        </form>
+    </div>
+    {% endfor %}
+</body>
+</html>

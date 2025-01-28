@@ -23,7 +23,7 @@ document.querySelectorAll('.adicionar').forEach(button => {
             <p>${titulo} (R$ ${preco.toFixed(2)})</p>
             <input type="hidden" name="livros" value="${livroId}">
             <label>Quantidade: </label>
-            <input type="number" name="quantidades" min="1" value="1" max="${estoque}" class="quantidade" data-preco="${preco}" data-id="${livroId}">
+            <input type="number" name="quantidades" min="1" value="1" max="${estoque}" class="quantidade" data-preco="${preco}" data-id="${livroId}" data-estoque="${estoque}">
             <button type="button" onclick="remover(${livroId})">Remover</button>
         `;
         selecionadosDiv.appendChild(div);
@@ -51,10 +51,15 @@ function atualizarTotal() {
     quantidades.forEach(input => {
         let quantidade = parseInt(input.value);
         const preco = parseFloat(input.dataset.preco);
+        const maxEstoque = parseInt(input.dataset.estoque);
         
-        // Impede o cálculo se a quantidade não for um número válido (como campos vazios)
+        // Validações para evitar inconsistências
         if (isNaN(quantidade) || quantidade <= 0) {
-            quantidade = 0; // Se a quantidade não for válida, ignora o livro no total
+            quantidade = 0; // Ignora valores inválidos
+        } else if (quantidade > maxEstoque) {
+            alert('A quantidade excede o estoque disponível!');
+            input.value = maxEstoque; // Corrige para o estoque máximo
+            quantidade = maxEstoque;
         }
 
         total += quantidade * preco;
