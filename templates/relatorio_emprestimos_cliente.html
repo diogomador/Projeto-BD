@@ -3,9 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='filtros.css') }}">
     <title>Relatório de Empréstimos por Cliente</title>
 </head>
 <body>
+    <nav>
+        <a href="{{ url_for('gerente_dashboard' ) }}">Início</a>
+        <a href="{{ url_for('listar_livros' ) }}">Listar Livros</a>
+        <a href="{{ url_for('listar_clientes' ) }}">Listar Clientes</a>
+        <a href="{{ url_for('listar_emprestimos' ) }}">Listar Emprestimos</a>
+        <a href="{{ url_for('top_livros' ) }}">Top Livros</a>
+        <a href="{{ url_for('livros_nao_emprestados' ) }}">Não Emprestados</a>
+        <a style="background-color: #052c25; color: white" href="{{ url_for('relatorio_emprestimos_cliente' ) }}">Total Empréstimos</a>
+        <a href="{{ url_for('clientes_acima_cem' ) }}">Acima R$100</a>
+    </nav>
     <h1>Relatório de Empréstimos por Cliente</h1>
     <form method="POST">
         <label for="data_inicio">Data Início:</label>
