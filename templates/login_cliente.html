@@ -21,7 +21,7 @@
     </form>
 
     <p>Não possui uma conta? <a href="{{ url_for('cadastro') }}">Cadastre-se aqui</a>.</p>
-    <p>Entrar como Gerente? <a href="{{ url_for('login_gerente') }}">Faça Login</a>.</p>
+    <p>Entrar como Gerente? <a href="{{ url_for('login_gerente') }}">Faça Login aqui</a>.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

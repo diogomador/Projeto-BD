@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
 *{
     padding: 0;
     margin: 0;
@@ -24,6 +26,7 @@ nav{
     width: 100%;
     height: 70px;
     gap: 10px;
+    font-family: "Liter", sans-serif;
 }
 
 nav a{
@@ -51,6 +54,7 @@ main{
     width: 100%;
     height: 100%;
     align-items: center;
+    font-family: "Liter", sans-serif;
 }
 
 .cad_titulo{
@@ -58,6 +62,7 @@ main{
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: "Young Serif", "Times New Roman";
 }
 
 .cad_titulo h1{
@@ -118,6 +123,7 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-family: "Liter", sans-serif;
 }
 button:hover {
     background-color: #0056b3;
