@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
 *{
     margin: 0;
     padding: 0;
@@ -41,7 +43,6 @@ div {
     justify-content: center;
     background-color: #f9f9f9;
     width: 70%;
-    height: 40%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
 }
@@ -146,7 +147,7 @@ aside{
     justify-content: center;
     background-color: #f9f9f9;
     width: 50vw; /* Ajuste a largura conforme necessário */
-    height: 45vh; /* Altura automática para caber o conteúdo */
+    height: 70vw; /* Altura automática para caber o conteúdo */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 1rem; /* Adiciona um padding para melhor espaçamento */

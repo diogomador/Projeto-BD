@@ -81,12 +81,13 @@ nav a:hover{
     padding: 2rem;
     display: flex;
     flex-direction: column;
-    height: 60%;
-    width: 70%;
+    height: fit-content;
+    width: fit-content;
     background-color: #f9f9f9;
     gap: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    font-family: "Liter", sans-serif;
 }
 
 input{
@@ -138,6 +139,7 @@ select{
     border-radius: 5px;
     background-color: transparent;
     width: 100%;
+    font-size: 20px;
 }
 
 #q-p, #q-p div, .select{
