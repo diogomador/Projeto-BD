@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
+
 *{
     padding: 0;
     margin: 0;
@@ -78,11 +81,13 @@ nav a:hover{
 .table{
     padding: 2rem;
     height: 35%;
-    width: 27%;
+    width: 50%;
     background-color: #f9f9f9;
     gap: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    font-family: "Liter", sans-serif;
+    text-align: center;
     }
 
 .main{

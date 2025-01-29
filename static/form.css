@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
 *{
     padding: 0;
     margin: 0;
@@ -52,10 +54,6 @@ nav a:hover{
     padding: 2rem;
 }
 
-.main h2{
-    border: 1px solid black;
-    color: white;
-}
 .list_titulo{
     width: 40%;
     display: flex;
@@ -73,26 +71,34 @@ nav a:hover{
     display: flex;
     justify-content: center;
     justify-content: space-between;
+    gap: 1vh;
     flex-direction: column;
     align-items: center;
     width: 27%;
     height: 17%;
+    font-family: "Liter", sans-serif;
 }
 
 .form label{
     color: white;
-    font-size: 15px;
+    font-size: 17px;
+}
+
+.form input {
+    font-size: 17px;
 }
 
 .botao{
     align-self: center;
-    width: 50%;
+    width: 40%;
     padding: 0.5rem;
     background-color: #b3dad9;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-family: "Liter", sans-serif;
+    font-size: 17px;
 }
 
 .table{
@@ -104,6 +110,8 @@ nav a:hover{
     gap: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    text-align: center;
+    font-family: "Liter", sans-serif;
     }
 
 .table thead{
@@ -113,4 +121,13 @@ nav a:hover{
 
 .table tbody{
     border: 1px solid black;
+}
+
+h2 {
+    position: absolute;
+    top: 30vh;
+    right: 12vw;
+    font-family: "Liter", sans-serif;
+    font-size: 32px;
+    color: #f9f9f9;
 }
