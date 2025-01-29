@@ -191,6 +191,7 @@ select{
     height: 80%;
     padding: 1rem;
     gap: 5px;
+    font-family: "Liter", sans-serif;
 }
 
 #editar_info .p1, #editar_info .p2{
@@ -210,25 +211,17 @@ select{
 }
 
 #excluir{
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    position: absolute;
+    bottom: 7vw;
+    right: 15vw;
 }
 
-#excluir span{
-    color: #ffffff;
-    text-align: left;
-    font-weight: bolder;
-}
-
-#excluir button{
-    align-self: center;
-    width: 100%;
-    padding: 0.5rem;
-    background-color: #b3dad9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+#excluir button {
     border: none;
-    border-radius: 5px;
+}
+
+#excluir img {
+    width: 2vw;
     cursor: pointer;
 }
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='cadastrosgerais.css') }}">
-    <title>Cadastrar Autor</title>
+    <title>Editar Perfil</title>
 </head>
 <body>
     <nav>
@@ -59,8 +59,7 @@
             </form>
             
             <form id='excluir' action="{{ url_for('excluir') }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir sua conta?')">
-                <span>Ou você deseja</span>
-                <button type="submit">Excluir sua conta</button>
+                <button type="submit"><img src="{{url_for('static', filename='images/trash-icon.png') }}" alt="ícone de lixeira"></button>
             </form>
         </div>
     </main>
