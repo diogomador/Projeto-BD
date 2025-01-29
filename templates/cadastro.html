@@ -8,12 +8,6 @@
 </head>
 <body>
 
-    <nav>
-        <a href="/">Página Inicial</a>
-        <a style="background-color: #052c25; color: white" href="/cadastro">Cadastrar-se</a>
-        <a href="/login_cliente">Login</a>
-    </nav>
-
     <h1>Cadastro de Usuários</h1>
 
     <form action="{{ url_for('cadastro') }}" method="post">
@@ -52,6 +46,8 @@
 
         <input class="enviar" type="submit" value="Enviar">
     </form>
+
+    <a href="{{url_for('index')}}" class="btn-index">&#x2190; Voltar para a Página Inicial</a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

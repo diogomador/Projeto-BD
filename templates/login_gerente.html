@@ -20,6 +20,7 @@
         <input class="enviar" type="submit" value="Entrar">
     </form>
 
+    <a href="{{url_for('index')}}" class="btn-index">&#x2190; Voltar para a Página Inicial</a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

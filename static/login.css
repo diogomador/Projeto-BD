@@ -118,3 +118,13 @@ p a:hover {
     background-color:#b92929;
     color:#f9f9f9;
 }
+
+.btn-index {
+    text-decoration: none;
+    font-family: "Liter", sans-serif;
+    font-size: 20px;
+    color: #f9f9f9;
+    position: absolute;
+    top: 5vh;
+    left: 2vw;
+}

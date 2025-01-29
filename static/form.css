@@ -131,3 +131,8 @@ h2 {
     font-size: 32px;
     color: #f9f9f9;
 }
+
+label, .botao, select {
+    font-size: 20px;
+    font-family: "Liter", sans-serif;
+}

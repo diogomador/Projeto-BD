@@ -23,6 +23,8 @@
     <p>Não possui uma conta? <a href="{{ url_for('cadastro') }}">Cadastre-se aqui</a>.</p>
     <p>Entrar como Gerente? <a href="{{ url_for('login_gerente') }}">Faça Login aqui</a>.</p>
 
+    <a href="{{url_for('index')}}" class="btn-index">&#x2190; Voltar para a Página Inicial</a>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div id="flash-container">
