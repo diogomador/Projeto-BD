@@ -26,10 +26,16 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         # Verifica se o usuário está logado e se ele é um gerente
         if not session.get('logged_in'):
+
+            flash("Por favor, realize o login como gerente.", "error")
+
             return redirect(url_for('login_gerente'))  # Redireciona para a página de login se não estiver logado
         
         # Verifica se o usuário tem o 'gerente_id' na sessão
         if not session.get('gerente_id'):
+
+            flash("Permissões negadas", "error")
+
             return redirect(url_for('login_cliente'))  # Redireciona se não for gerente
 
         # Consulta o banco de dados para verificar se o gerente é válido
@@ -41,6 +47,9 @@ def admin_required(f):
 
         # Se o gerente não for encontrado no banco de dados, redireciona
         if not gerente:
+
+            flash("Gerente não encontrado", "error")
+
             return redirect(url_for('login_cliente'))
 
         return f(*args, **kwargs)
@@ -70,7 +79,7 @@ def cadastro():
 
         # Verificar se o e-mail já está em uso
         if is_email_taken(email):
-            flash('Esse e-mail já está em uso. Escolha outro.', 'warning')
+            flash('Esse e-mail já está em uso. Por favor, escolha outro.', 'warning')
             return redirect(url_for('cadastro'))
 
         # Hash da senha
@@ -99,7 +108,7 @@ def cadastro():
 
         except IntegrityError:
             mysql.connection.rollback()
-            flash('Erro ao cadastrar cliente. Tente novamente.', 'danger')
+            flash('Erro ao cadastrar cliente. Tente novamente.', 'error')
         finally:
             cursor.close()
 
@@ -119,7 +128,7 @@ def login_cliente():
             cursor.close()
 
             if not cliente:
-                flash('E-mail não encontrado.', 'danger')
+                flash('E-mail não encontrado.', 'error')
                 return redirect(url_for('login_cliente'))
 
             if bcrypt.check_password_hash(cliente[4], senha):  # Índice 4 corresponde à senha
@@ -128,11 +137,11 @@ def login_cliente():
                 session['nome'] = cliente[1]
                 return redirect(url_for('cliente_dashboard'))
             else:
-                flash('Senha incorreta.', 'danger')
+                flash('Senha incorreta.', 'error')
 
         except Exception as e:
             print(f"Erro no login do cliente: {e}")
-            flash('Erro interno no servidor.', 'danger')
+            flash('Erro interno no servidor.', 'error')
 
     return render_template('login_cliente.html')
 
@@ -165,7 +174,7 @@ def login_gerente():
         except Exception as e:
             print(f"Erro no login do gerente: {e}")  # Apenas para debug; remova em produção.
 
-        flash('Credenciais inválidas para gerente.', 'danger')
+        flash('Credenciais inválidas para gerente.', 'error')
 
     return render_template('login_gerente.html')
 
@@ -213,7 +222,7 @@ def adicionar_gerente():
         gerente_existente = cursor.fetchone()
 
         if gerente_existente:
-            flash('E-mail já cadastrado para outro gerente.', 'danger')
+            flash('E-mail já cadastrado para outro gerente.', 'error')
             return redirect(url_for('adicionar_gerente'))
 
         # Gerar o hash da senha
@@ -230,7 +239,7 @@ def adicionar_gerente():
             flash('Gerente adicionado com sucesso!', 'success')
         except Exception as e:
             mysql.connection.rollback()
-            flash(f'Erro ao adicionar gerente: {e}', 'danger')
+            flash(f'Erro ao adicionar gerente: {e}', 'error')
         finally:
             cursor.close()
 
@@ -305,7 +314,7 @@ def editar():
             flash('Dados atualizados com sucesso!', 'success')
         except Exception as e:
             mysql.connection.rollback()
-            flash('Erro ao atualizar os dados: ' + str(e), 'danger')
+            flash('Erro ao atualizar os dados: ' + str(e), 'error')
         finally:
             cursor.close()
 
@@ -326,7 +335,7 @@ def editar():
 @app.route('/excluir', methods=['POST'])
 def excluir():
     if 'logged_in' not in session or not session['logged_in']:
-        flash('Você precisa estar logado para acessar esta página.', 'danger')
+        flash('Você precisa estar logado para acessar esta página.', 'error')
         return redirect(url_for('login'))
 
     user_id = session['user_id']
@@ -341,7 +350,7 @@ def excluir():
 
         mysql.connection.commit()
         session.clear()
-        flash('Conta excluída com sucesso.', 'info')
+        flash('Conta excluída com sucesso.', 'success')
     except Exception as e:
         mysql.connection.rollback()
         flash('Erro ao excluir a conta: ' + str(e), 'danger')
@@ -369,7 +378,7 @@ def cadastrar_autor():
 
         except Exception as e:
             mysql.connection.rollback()
-            flash(f'Erro ao cadastrar o autor: {e}', 'danger')
+            flash(f'Erro ao cadastrar o autor: {e}', 'error')
         finally:
             cursor.close()
 
@@ -397,7 +406,7 @@ def cadastrar_editora():
 
         except Exception as e:
             mysql.connection.rollback()
-            flash(f'Erro ao cadastrar a editora: {e}', 'danger')
+            flash(f'Erro ao cadastrar a editora: {e}', 'error')
         finally:
             cursor.close()
 
@@ -467,7 +476,7 @@ def cadastrar_livro():
 
         except Exception as e:
             mysql.connection.rollback()
-            flash(f'Erro ao cadastrar o livro: {e}', 'danger')
+            flash(f'Erro ao cadastrar o livro: {e}', 'error')
         finally:
             cursor.close()
 
@@ -496,7 +505,7 @@ def emprestimo():
         quantidades = request.form.getlist('quantidades')
 
         if not livros_ids or not quantidades:
-            flash('Nenhum livro foi selecionado para o empréstimo.', 'danger')
+            flash('Nenhum livro foi selecionado para o empréstimo.', 'error')
             return redirect('/emprestimo')
 
         emprestimo_livros = []
@@ -507,7 +516,7 @@ def emprestimo():
                     'quantidade': int(quantidade)
                 })
             except ValueError:
-                flash('Algum dos valores fornecidos é inválido.', 'danger')
+                flash('Algum dos valores fornecidos é inválido.', 'error')
                 return redirect('/emprestimo')
 
         # Inicializa o cursor com o padrão do flask-mysqldb (não é necessário usar DictCursor)
@@ -525,7 +534,7 @@ def emprestimo():
                 return redirect('/emprestimo')
 
             if livro[1] < item['quantidade']:  # A quantidade de estoque é o segundo item do resultado
-                flash(f'O livro "{item["livro_id"]}" não tem estoque suficiente. Estoque atual: {livro[1]}.', 'danger')
+                flash(f'O livro {item["livro_id"]} não tem estoque suficiente. Estoque atual: {livro[1]}.', 'error')
                 cursor.close()
                 return redirect('/emprestimo')
 
@@ -561,7 +570,7 @@ def emprestimo():
         cursor.close()
 
         flash('Empréstimo realizado com sucesso!', 'success')
-        return redirect('/emprestimo')
+        return redirect('/gerenciar_emprestimos')
 
     # Método GET - Exibição dos livros
     cursor = mysql.connection.cursor()
@@ -570,7 +579,6 @@ def emprestimo():
         FROM tb_livro
         JOIN tb_genero ON gen_id = liv_gen_id
         JOIN tb_autor ON aut_id = liv_aut_id
-        WHERE liv_estoque > 0
     """)
     livros = cursor.fetchall()
     cursor.close()
@@ -601,7 +609,7 @@ def listar_clientes():
         cursor.close()
         return render_template('listar_clientes.html', clientes=clientes, ordem_nome=ordem_nome, ordem_email=ordem_email)
     except Exception as e:
-        flash(f'Erro ao listar clientes: {e}', 'danger')
+        flash(f'Erro ao listar clientes: {e}', 'error')
         return redirect(url_for('gerente_dashboard'))
 
 # Listagem de livros com ordenação
@@ -635,7 +643,7 @@ def listar_livros():
 
         return render_template('listar_livros.html', livros=livros, ordem_titulo=ordem_titulo)
     except Exception as e:
-        flash(f'Erro ao listar livros: {str(e)}', 'danger')
+        flash(f'Erro ao listar livros: {str(e)}', 'error')
         return redirect(url_for('gerente_dashboard'))
 
 
@@ -678,7 +686,7 @@ def listar_emprestimos():
 
         return render_template('listar_emprestimos.html', emprestimos=emprestimos, ordem_data=ordem_data)
     except Exception as e:
-        flash(f'Erro ao listar empréstimos: {str(e)}', 'danger')
+        flash(f'Erro ao listar empréstimos: {str(e)}', 'error')
         return redirect(url_for('gerente_dashboard'))
 
 # Total de empréstimos em reais por usuário
@@ -705,7 +713,7 @@ def relatorio_emprestimos_cliente():
             relatorio = cursor.fetchall()
             cursor.close()
         except Exception as e:
-            flash(f'Erro ao gerar relatório: {e}', 'danger')
+            flash(f'Erro ao gerar relatório: {e}', 'error')
             return redirect(url_for('gerente_dashboard'))
 
     return render_template('relatorio_emprestimos_cliente.html', relatorio=relatorio)
@@ -732,7 +740,7 @@ def clientes_acima_cem():
             clientes = cursor.fetchall()
             cursor.close()
         except Exception as e:
-            flash(f'Erro ao gerar relatório: {e}', 'danger')
+            flash(f'Erro ao gerar relatório: {e}', 'error')
             return redirect(url_for('gerente_dashboard'))
 
     return render_template('clientes_acima_cem.html', clientes=clientes)
@@ -768,7 +776,7 @@ def top_livros():
 
         return render_template('top_livros.html', top_livros=top_livros, dias=dias)
     except Exception as e:
-        flash(f'Erro ao listar os top livros: {str(e)}', 'danger')
+        flash(f'Erro ao listar os top livros: {str(e)}', 'error')
         return redirect(url_for('gerente_dashboard'))
 
 # Livros não emprestados
@@ -794,7 +802,7 @@ def livros_nao_emprestados():
 
         return render_template('livros_nao_emprestados.html', livros=livros_nao_emprestados)
     except Exception as e:
-        flash(f'Erro ao listar livros não emprestados: {str(e)}', 'danger')
+        flash(f'Erro ao listar livros não emprestados: {str(e)}', 'error')
         return redirect(url_for('gerente_dashboard'))
 
 
@@ -812,7 +820,7 @@ def devolver(emp_id):
     
     if not resultado or resultado[0] == 'Finalizado':
         # Interrompe o processo, caso o empréstimo já tenha sido finalizado
-        return redirect(url_for("cliente_dashboard"))
+        return redirect(url_for("gerenciar_emprestimos"))
 
     # Busca os livros e atualiza o estoque
     cursor.execute("""
@@ -838,6 +846,8 @@ def devolver(emp_id):
     
     mysql.connection.commit()
     cursor.close()
+
+    flash("Empréstimo devolvido com sucesso!", "success")
 
     return redirect(url_for("gerenciar_emprestimos"))
 

@@ -11,6 +11,7 @@
         <a href="cliente_dashboard">Início</a>
         <a href="editar">Editar</a>
         <a style="background-color: #052c25; color: white" href="emprestimo">Novo Emprestimo</a>
+        <a href="{{ url_for('gerenciar_emprestimos' ) }}">Meus Empréstimos</a>
         <a href="{{ url_for('index' ) }}">Sair</a>
     </nav>
     <main>
@@ -45,6 +46,16 @@
             </form>
         </div>
     </main>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
     
     <script src="{{url_for('static', filename='js/script.js')}}"></script>
 </body>

@@ -4,34 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meus Empréstimos</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}"> -->
-    <style>
-        div {
-            border: 1px solid black
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='gerenciar_emprestimos.css') }}">
 </head>
 <body>
+    <nav>
+        <a href="cliente_dashboard">Início</a>
+        <a href="editar">Editar</a>
+        <a href="emprestimo">Novo Emprestimo</a>
+        <a style="background-color: #052c25; color: white" href="{{ url_for('gerenciar_emprestimos' ) }}">Meus Empréstimos</a>
+        <a href="{{ url_for('index' ) }}">Sair</a>
+    </nav>
     <h1>Meus Empréstimos</h1>
     {% for item in emprestimos %}
     <div class="emprestimo-container">
-        <h2>Empréstimo #{{ item.emprestimo[0] }}</h2>
-        <p>Data de Início: {{ item.emprestimo[1] }}</p>
-        <p>Data de Devolução: {{ item.emprestimo[2] }}</p>
+        <h2>{{ item.emprestimo[1].strftime("%d/%m/%Y") }}</h2>
+        <p>Data de Devolução: {{ item.emprestimo[2].strftime("%d/%m/%Y") }}</p>
         <p>Status: {{ item.emprestimo[3] }}</p>
         <p>Total: R$ {{ item.emprestimo[4] }}</p>
         <h3>Livros:</h3>
         <ul>
             {% for livro in item.livros %}
             <li>
-                {{ livro[0] }} - Quantidade: {{ livro[1] }} - Preço: R$ {{ livro[2] }}
+                   {{ livro[0] }} | {{ livro[1] }} und. | Preço: R$ {{ livro[2] }}
             </li>
             {% endfor %}
         </ul>
-        <form action="{{url_for('devolver', emp_id=item.emprestimo[0])}}" method="post">
-            <button type="submit">Devolver</button>
-        </form>
+        {% if item.emprestimo[3] == "Ativo" %}
+            <form action="{{url_for('devolver', emp_id=item.emprestimo[0])}}" method="post" onsubmit="return confirm('Tem certeza que deseja realizar devolução?')">
+                <button type="submit">Devolver</button>
+            </form>
+        {% endif %}
     </div>
     {% endfor %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <script>
+        setTimeout(function() {
+            var flashContainer = document.getElementById("flash-container");
+            if (flashContainer) {
+                flashContainer.style.transition = "opacity 0.5s";
+                flashContainer.style.opacity = "0";
+                setTimeout(() => flashContainer.remove(), 500); //
+            }
+        }, 3000);
+    </script>
 </body>
 </html>

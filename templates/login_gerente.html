@@ -20,5 +20,27 @@
         <input class="enviar" type="submit" value="Entrar">
     </form>
 
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        setTimeout(function() {
+            var flashContainer = document.getElementById("flash-container");
+            if (flashContainer) {
+                flashContainer.style.transition = "opacity 0.5s";
+                flashContainer.style.opacity = "0";
+                setTimeout(() => flashContainer.remove(), 500); //
+            }
+        }, 3000);
+    </script>
+
 </body>
 </html>

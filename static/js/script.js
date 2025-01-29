@@ -75,3 +75,12 @@ document.addEventListener('input', function(event) {
         atualizarTotal();
     }
 });
+
+setTimeout(function() {
+    var flashContainer = document.getElementById("flash-container");
+    if (flashContainer) {
+        flashContainer.style.transition = "opacity 0.5s";
+        flashContainer.style.opacity = "0";
+        setTimeout(() => flashContainer.remove(), 500); //
+    }
+}, 3000);

@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #052c25;
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #b3dad9;
+    width: 100%;
+    padding: 14px;
+    gap: 10px;
+    font-family: "Liter", sans-serif;
+    font-weight: bold ;
+}
+
+nav a{
+    text-decoration: none;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #052c25;
+    border-radius: 5px;
+    padding: 10px 20px;
+    opacity: 90%;
+    transition: transform 0.3s ease, opacity 0.3s ease ;
+
+}
+
+nav a:hover{
+    opacity: 100%;
+    transform: scale(1.1);
+}
+
+h1 {
+    font-family: "Young Serif", 'Times New Roman';
+    font-size: 60px;
+    color:#f9f9f9;
+    padding: 3vw;
+    margin-left: -60vw;
+}
+
+.emprestimo-container {
+    width: 80vw;
+    border-radius: 20px;
+    background-color: #b3dad9;
+    color: #052c25;
+    font-family: "Liter", sans-serif;
+    font-size: 20px;
+    margin: 2vh;
+    padding: 1vw;
+}
+
+.emprestimo-container li {
+    list-style-type: none;
+}
+
+button {
+    background-color: #052c25;
+    color: #f9f9f9;
+    width: 7vw;
+    height: 6vh;
+    font-size: 25px;
+    margin-left: 70vw;
+    font-family: "Liter", sans-serif;
+    border-radius: 14px;
+    border: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease ;
+}
+
+button:hover{
+    opacity: 100%;
+    transform: scale(1.1);
+}
+
+.flash-messages {
+    margin: 10px 0;
+    padding: 10px;
+}
+
+.flash-message {
+    padding: 10px;
+    border-radius: 14px;
+    font-family: "Liter", sans-serif;
+    font-size: 20px;
+    position: absolute;
+    top: 20vh;
+    right: 3vw;
+}
+
+.flash-message.success {
+    background-color: #44a047;
+    color:#f9f9f9;
+}
+
+.flash-message.error {
+    background-color:#b92929;
+    color:#f9f9f9;
+}

@@ -237,3 +237,33 @@ select{
     border-radius: 5px;
     cursor: pointer;
 }
+
+.flash-messages {
+    margin: 10px 0;
+    padding: 10px;
+}
+
+.flash-message {
+    padding: 10px;
+    border-radius: 14px;
+    font-family: "Liter", sans-serif;
+    font-size: 20px;
+    position: absolute;
+    top: 20vh;
+    right: 3vw;
+}
+
+.flash-message.success {
+    background-color: #44a047;
+    color:#f9f9f9;
+}
+
+.flash-message.warning {
+    background-color:#ffb300df;
+    color:#f9f9f9;
+}
+
+.flash-message.error {
+    background-color:#b92929;
+    color:#f9f9f9;
+}

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='cadastro.css') }}">
-    <title>Document</title>
+    <title>Cadastrar-se</title>
 </head>
 <body>
 
     <nav>
-        <a href="/"><button>Página Inicial</button></a>
-        <a href="/cadastro"><button>Cadastrar Cliente</button></a>
-        <a href="/login_cliente"><button>Login</button></a>
+        <a href="/">Página Inicial</a>
+        <a style="background-color: #052c25; color: white" href="/cadastro">Cadastrar-se</a>
+        <a href="/login_cliente">Login</a>
     </nav>
 
     <h1>Cadastro de Usuários</h1>
@@ -52,6 +52,28 @@
 
         <input class="enviar" type="submit" value="Enviar">
     </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <script>
+        setTimeout(function() {
+            var flashContainer = document.getElementById("flash-container");
+            if (flashContainer) {
+                flashContainer.style.transition = "opacity 0.5s";
+                flashContainer.style.opacity = "0";
+                setTimeout(() => flashContainer.remove(), 500); //
+            }
+        }, 3000);
+    </script>
     
 </body>
 </html>

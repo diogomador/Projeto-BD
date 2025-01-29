@@ -1,3 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
+* {
+    padding:0;
+    margin:0;
+    box-sizing: border-box;
+}
+
+nav{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color:#b3dad9;
+    width: 100vw;
+    padding: 10px;
+    font-family: "Liter", sans-serif;
+    font-weight: bold ;
+    border: 1px solid white;
+}
+
+nav a{
+    text-decoration: none;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #052c25;
+    border-radius: 5px;
+    padding: 15px 25px;
+    opacity: 90%;
+    transition: transform 0.3s ease, opacity 0.3s ease ;
+}
+
+nav a:hover{
+    opacity: 100%;
+    transform: scale(1.1);
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,6 +43,7 @@ body {
     flex-direction: column;
     align-items: center;
     background-color: #052c25;
+    height: auto;
 }
 
 h1 {
@@ -150,3 +188,32 @@ button {
     background-color: #b3dad9;
 }
 
+.flash-messages {
+    margin: 10px 0;
+    padding: 10px;
+}
+
+.flash-message {
+    padding: 10px;
+    border-radius: 14px;
+    font-family: "Liter", sans-serif;
+    font-size: 20px;
+    position: absolute;
+    top: 20vh;
+    right: 3vw;
+}
+
+.flash-message.success {
+    background-color: #44a047;
+    color:#f9f9f9;
+}
+
+.flash-message.warning {
+    background-color:#ffb300df;
+    color:#f9f9f9;
+}
+
+.flash-message.error {
+    background-color:#b92929;
+    color:#f9f9f9;
+}
