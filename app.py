@@ -280,7 +280,7 @@ def gerente_dashboard():
 def editar():
     if 'logged_in' not in session or not session['logged_in']:
         flash('Você precisa estar logado para acessar esta página.', 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('login_cliente'))
 
     user_id = session['user_id']
     if request.method == 'POST':
@@ -336,7 +336,7 @@ def editar():
 def excluir():
     if 'logged_in' not in session or not session['logged_in']:
         flash('Você precisa estar logado para acessar esta página.', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('login_cliente'))
 
     user_id = session['user_id']
     try:
@@ -363,7 +363,7 @@ def excluir():
 @admin_required
 def cadastrar_autor():
     if not session.get('logged_in') or not session.get('gerente_id'):
-        return redirect(url_for('login'))
+        return redirect(url_for('login_gerente'))
 
     if request.method == 'POST':
         autor_nome = request.form.get('autor_nome')
@@ -391,7 +391,7 @@ def cadastrar_autor():
 @admin_required
 def cadastrar_editora():
     if not session.get('logged_in') or not session.get('gerente_id'):
-        return redirect(url_for('login'))
+        return redirect(url_for('login_gerente'))
 
     if request.method == 'POST':
         editora_nome = request.form.get('editora_nome')
@@ -419,7 +419,7 @@ def cadastrar_editora():
 @admin_required
 def cadastrar_genero():
     if not session.get('logged_in') or not session.get('gerente_id'):
-        return redirect(url_for('login'))
+        return redirect(url_for('login_gerente'))
 
     if request.method == 'POST':
         genero_nome = request.form.get('genero_nome')
@@ -498,6 +498,10 @@ def cadastrar_livro():
 
 @app.route('/emprestimo', methods=['GET', 'POST'])
 def emprestimo():
+    if 'logged_in' not in session or not session['logged_in']:
+        flash('Você precisa estar logado para acessar esta página.', 'danger')
+        return redirect(url_for('login_cliente'))
+
     if request.method == 'POST':
         # Obtendo os dados do formulário
         duracao_dias = int(request.form.get('duracao', 0))
@@ -785,24 +789,22 @@ def top_livros():
 def livros_nao_emprestados():
     try:
         with mysql.connection.cursor() as cursor:
-            # Montagem da consulta SQL para livros não emprestados
+            # Montagem da consulta SQL para livros em estoque
             query = """
                 SELECT 
                     l.liv_id, 
                     l.liv_titulo 
                 FROM 
                     tb_livro l
-                LEFT JOIN 
-                    tb_emprestimo_livro el ON l.liv_id = el.eml_liv_id
                 WHERE 
-                    el.eml_liv_id IS NULL
+                    l.liv_estoque > 0  -- Apenas livros com estoque disponível
             """
             cursor.execute(query)
             livros_nao_emprestados = cursor.fetchall()
 
         return render_template('livros_nao_emprestados.html', livros=livros_nao_emprestados)
     except Exception as e:
-        flash(f'Erro ao listar livros não emprestados: {str(e)}', 'error')
+        flash(f'Erro ao listar livros em estoque: {str(e)}', 'error')
         return redirect(url_for('gerente_dashboard'))
 
 
