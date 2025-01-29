@@ -58,9 +58,8 @@ ul{
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60%;
-    height: 50%;
-    padding: 1;
+    width: 100%;
+    height: 40%;
     gap: 1rem;
 }
 
@@ -68,8 +67,8 @@ li{
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 45%;
-    height: 30%;
+    width: 40%;
+    height: 40%;
     gap: 5px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: #052c25;
@@ -129,15 +128,19 @@ aside{
 .info span{
     font-size: 200%;
     color: #baf1e6;
+    font-family: "Young Serif", "Times New Roman";
 }
 .info h1{
     font-size: 100%;
     color: #f9f9f9;
+    font-family: "Liter", sans-serif;
+    font-weight: lighter;
 }
 
 #container {
     display: flex;
     width: 100vw;
+    height: 120vh;
     gap: 2rem; /* Espaçamento entre as divs */
 }
 
@@ -146,11 +149,15 @@ aside{
     flex-direction: column;
     justify-content: center;
     background-color: #f9f9f9;
-    width: 50vw; /* Ajuste a largura conforme necessário */
-    height: 70vw; /* Altura automática para caber o conteúdo */
+    width: 40%; /* Ajuste a largura conforme necessário */
+    height: 50%; /* Altura automática para caber o conteúdo */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-    padding: 1rem; /* Adiciona um padding para melhor espaçamento */
+    font-family: "Liter", sans-serif;
+}
+
+#filtros a, #atividades a {
+    font-family: "Liter", sans-serif;
 }
 
 /* Estilos para h2 dentro da div de filtros */
@@ -169,8 +176,8 @@ aside{
 }
 
 #but_sair{
-    height: 100%;
-    width: 10%;
+    height: 120%;
+    width: 15%;
     margin-right: 20px;
     background-color: #052c25;
     color: #f9f9f9;
@@ -178,4 +185,7 @@ aside{
     border: none;
     font-size: 15px;
     cursor: pointer;
+    font-family: "Liter", sans-serif;
+    margin-left: 50vw;
+    margin-top: -9vh;
 }

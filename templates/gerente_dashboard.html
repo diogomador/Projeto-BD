@@ -18,9 +18,9 @@
                     <li><a href="{{ url_for('cadastrar_genero') }}">Cadastrar Gênero</a></li>
                 </ul>
             </div>
-            <div id="filtros">
+            <div id="filtros" style="height: 120vh;">
                 <h2>Filtros</h2>
-                <ul>
+                <ul style="height: 30%;">
                     <li><a href="{{ url_for('listar_livros') }}">Listar Livros</a></li>
                     <li><a href="{{ url_for('listar_clientes') }}">Listar Clientes</a></li>
                     <li><a href="{{ url_for('listar_emprestimos') }}">Listar Empréstimos</a></li>
@@ -35,7 +35,7 @@
                 <button id="but_sair" type="submit">Fazer Logout</button>
             </form>
         </div>
-        <aside>
+        <aside style="height: 120vh;">
             <div id="infos">
                 <div class="info">
                     <span>{{total_livros}}</span>
