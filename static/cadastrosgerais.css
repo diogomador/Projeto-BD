@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Young+Serif&display=swap');
+
 *{
     padding: 0;
     margin: 0;
@@ -52,14 +54,13 @@ nav a:hover{
 }
 
 .cad_titulo{
-    border: 1px solid black;
+    font-family: "Young Serif", "Times New Roman";
     width: 40%;
     display: flex;
     align-items: center;
 }
 
 .cad_titulo h1{
-    border: 1px solid white;
     width: 100%;
     font-size: 700%;
     color: #b3dad9;
@@ -67,8 +68,7 @@ nav a:hover{
 }
 /* Livros */
 .formulario{
-    border: 2px solid black;
-    width: 60%;
+    width: 70%;
     height: 100%;
     display: flex;
     align-items: center;
@@ -95,8 +95,9 @@ input{
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 20px;
     box-sizing: border-box;
+    font-family: "Liter", sans-serif;
 }
 
 #liv-p-i-a{
@@ -168,10 +169,12 @@ select{
     background-color: #f9f9f9;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-    width: 40%;
+    width: 50%;
     height: 25%;
     padding: 1rem;
     gap: 5px;
+    font-size: 25px;
+    font-family: "Liter", sans-serif;
 }
 
 #editar_info{
@@ -236,6 +239,7 @@ select{
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 25px;
 }
 
 .flash-messages {
