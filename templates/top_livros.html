@@ -17,37 +17,42 @@
         <a href="{{ url_for('relatorio_emprestimos_cliente' ) }}">Total Empréstimos</a>
         <a href="{{ url_for('clientes_acima_cem' ) }}">Acima R$100</a>
     </nav>
-    <h1>Top Livros</h1>
-    <form method="GET">
-        <label for="dias">Últimos:</label>
-        <select name="dias" id="dias">
-            <option value="7">7 dias</option>
-            <option value="30" selected>30 dias</option>
-            <option value="60">60 dias</option>
-            <option value="90">90 dias</option>
-        </select>
-        <button type="submit">Filtrar</button>
-    </form>
-
-    {% if top_livros %}
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Título do Livro</th>
-                <th>Total de Empréstimos</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for livro in top_livros %}
-            <tr>
-                <td>{{ livro[0] }}</td>
-                <td>{{ livro[1] }}</td>
-                <td>{{ livro[2] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+    <main class="main">
+        <div class="list_titulo">
+            <h1>Top Livros</h1>
+        </div>
+        <form method="GET" class="form">
+            <label for="dias">Últimos:</label>
+            <select name="dias" id="dias">
+                <option value="7">7 dias</option>
+                <option value="30" selected>30 dias</option>
+                <option value="60">60 dias</option>
+                <option value="90">90 dias</option>
+            </select>
+            <button type="submit" class="botao">Filtrar</button>
+        </form>
+    
+        {% if top_livros %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título do Livro</th>
+                    <th>Total de Empréstimos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livro in top_livros %}
+                <tr>
+                    <td>{{ livro[0] }}</td>
+                    <td>{{ livro[1] }}</td>
+                    <td>{{ livro[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </main>
+    
 </body>
 </html>

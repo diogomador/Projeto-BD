@@ -17,37 +17,41 @@
         <a href="{{ url_for('relatorio_emprestimos_cliente' ) }}">Total Empréstimos</a>
         <a href="{{ url_for('clientes_acima_cem' ) }}">Acima R$100</a>
     </nav>
-    <h1>Lista de Empréstimos</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome do Cliente</th>
-                <th>Título do Livro</th>
-                <th>
-                    <a href="{{ url_for('listar_emprestimos', ordem='asc') }}">▲</a>
-                        Data de Empréstimo
-                    <a href="{{ url_for('listar_emprestimos', ordem='desc') }}">▼</a>
-                </th>
-                <th>Data de Devolução</th>
-                <th>Quantidade</th>
-                <th>Preço</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for emprestimo in emprestimos %}
-            <tr>
-                <td>{{ emprestimo[0] }}</td>
-                <td>{{ emprestimo[1] }}</td>
-                <td>{{ emprestimo[2] }}</td>
-                <td>{{ emprestimo[3] }}</td>
-                <td>{{ emprestimo[4] }}</td>
-                <td>{{ emprestimo[5] }}</td>
-                <td>{{ emprestimo[6] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
+    <main class="main">
+        <div class="list_titulo">
+            <h1>Lista de Empréstimos</h1>
+        </div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome do Cliente</th>
+                    <th>Título do Livro</th>
+                    <th>
+                        <a href="{{ url_for('listar_emprestimos', ordem='asc') }}">▲</a>
+                            Data de Empréstimo
+                        <a href="{{ url_for('listar_emprestimos', ordem='desc') }}">▼</a>
+                    </th>
+                    <th>Data de Devolução</th>
+                    <th>Quantidade</th>
+                    <th>Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emprestimo in emprestimos %}
+                <tr>
+                    <td>{{ emprestimo[0] }}</td>
+                    <td>{{ emprestimo[1] }}</td>
+                    <td>{{ emprestimo[2] }}</td>
+                    <td>{{ emprestimo[3] }}</td>
+                    <td>{{ emprestimo[4] }}</td>
+                    <td>{{ emprestimo[5] }}</td>
+                    <td>{{ emprestimo[6] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
 </body>
 </html>

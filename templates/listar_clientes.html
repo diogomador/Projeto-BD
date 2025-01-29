@@ -17,9 +17,11 @@
         <a href="{{ url_for('relatorio_emprestimos_cliente' ) }}">Total Empréstimos</a>
         <a href="{{ url_for('clientes_acima_cem' ) }}">Acima R$100</a>
     </nav>
-    <main>
-        <h1>Lista de Clientes</h1>
-        <table>
+    <main class="main">
+        <div class="list_titulo">
+            <h1>Lista de Clientes</h1>
+        </div>
+        <table class="table">
             <thead>
                 <tr>
                     <th>
@@ -41,7 +43,6 @@
                 {% endfor %}
             </tbody>
         </table>
-        <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
     </main>
 </body>
 </html>

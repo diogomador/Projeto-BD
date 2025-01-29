@@ -17,7 +17,10 @@
         <a href="{{ url_for('relatorio_emprestimos_cliente' ) }}">Total Empréstimos</a>
         <a style="background-color: #052c25; color: white" href="{{ url_for('clientes_acima_cem' ) }}">Acima R$100</a>
     </nav>
-    <h1>Clientes com Empréstimos Acima de R$100</h1>
+    <main class="main">
+        <div class="list_titulo">
+            <h1>Clientes com Empréstimos Acima de R$100</h1>
+        </div>
     <form method="POST">
         <label for="data_inicio">Data Início:</label>
         <input type="date" id="data_inicio" name="data_inicio" required>
@@ -28,7 +31,7 @@
 
     {% if clientes %}
     <h2>Resultado:</h2>
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th>Nome do Cliente</th>
@@ -45,6 +48,6 @@
         </tbody>
     </table>
     {% endif %}
-    <a href="{{ url_for('gerente_dashboard') }}">Voltar ao Dashboard</a>
+   
 </body>
 </html>

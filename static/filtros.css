@@ -63,3 +63,71 @@ nav a:hover{
     width: 100%;
     padding: 2rem;
 }
+
+#cadastro_livros button{
+    align-self: center;
+    width: 30%;
+    padding: 0.5rem;
+    background-color: #b3dad9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.table{
+    padding: 2rem;
+    height: 35%;
+    width: 27%;
+    background-color: #f9f9f9;
+    gap: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    }
+
+.main{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 2rem;
+}
+
+.list_titulo{
+    width: 40%;
+    display: flex;
+    align-items: center;
+}
+
+.list_titulo h1{
+    width: 100%;
+    font-size: 300%;
+    color: #b3dad9;
+    opacity: 90%;
+}
+
+.form{
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 27%;
+    height: 10%;
+}
+
+.form label{
+    color: white;
+    font-size: 15px;
+}
+
+.botao{
+    align-self: center;
+    width: 50%;
+    padding: 0.5rem;
+    background-color: #b3dad9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
