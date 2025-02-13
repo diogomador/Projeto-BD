@@ -1,25 +1,21 @@
 from flask import Flask, render_template, redirect, request, url_for, flash, session
-from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy
 from MySQLdb._exceptions import IntegrityError
 from flask_bcrypt import Bcrypt
 from functools import wraps
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from models import User, Cliente, Gerente, Emprestimo, Livro, Autor, Editora, Genero
 
 app = Flask(__name__)
-mysql = MySQL(app)
-bcrypt = Bcrypt(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://usuario:senha@localhost/nome_do_banco'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'muitodificil'
-app.config.from_object('models.config.Config')
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
 login_manager.login_view = 'login_cliente'
 
-class User(UserMixin):
-    def __init__(self, id, email, nome):
-        self.id = id
-        self.email = email
-        self.nome = nome
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -86,41 +82,18 @@ def cadastro():
         email = request.form.get('email')
         senha = request.form.get('senha')
         telefone = request.form.get('telefone')
-        estado = request.form.get('estado')
-        cidade = request.form.get('cidade')
-        bairro = request.form.get('bairro')
-        rua = request.form.get('rua')
-        numero = request.form.get('numero')
 
-        if is_email_taken(email):
+        if Cliente.query.filter_by(cli_email=email).first():
             flash('Esse e-mail já está em uso. Por favor, escolha outro.', 'warning')
             return redirect(url_for('cadastro'))
 
         hashed_senha = bcrypt.generate_password_hash(senha).decode('utf-8')
+        novo_cliente = Cliente(cli_nome=nome, cli_email=email, cli_senha=hashed_senha, cli_telefone=telefone)
 
-        try:
-            cursor = mysql.connection.cursor()
-            cursor.execute(
-                'INSERT INTO tb_cliente (cli_nome, cli_email, cli_senha, cli_telefone) VALUES (%s, %s, %s, %s)',
-                (nome, email, hashed_senha, telefone)
-            )
-            cliente_id = cursor.lastrowid
-
-            cursor.execute(
-                'INSERT INTO tb_endereco (end_cli_id, end_estado, end_cidade, end_bairro, end_rua, end_numero) '
-                'VALUES (%s, %s, %s, %s, %s, %s)',
-                (cliente_id, estado, cidade, bairro, rua, numero)
-            )
-
-            mysql.connection.commit()
-            flash('Cadastro realizado com sucesso! Você pode fazer login agora.', 'success')
-            return redirect(url_for('login_cliente'))
-
-        except IntegrityError:
-            mysql.connection.rollback()
-            flash('Erro ao cadastrar cliente. Tente novamente.', 'error')
-        finally:
-            cursor.close()
+        db.session.add(novo_cliente)
+        db.session.commit()
+        flash('Cadastro realizado com sucesso! Você pode fazer login agora.', 'success')
+        return redirect(url_for('login_cliente'))
 
     return render_template('cadastro.html')
 
@@ -129,15 +102,11 @@ def login_cliente():
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
+        cliente = Cliente.query.filter_by(cli_email=email).first()
 
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM tb_cliente WHERE cli_email = %s", (email,))
-        cliente = cursor.fetchone()
-        cursor.close()
-
-        if cliente and bcrypt.check_password_hash(cliente[4], senha):
-            user = User(cliente[0], cliente[1], cliente[2])
-            login_user(user)  # Usando Flask-Login para logar o usuário
+        if cliente and bcrypt.check_password_hash(cliente.cli_senha, senha):
+            user = User(id=cliente.cli_id, email=cliente.cli_email, nome=cliente.cli_nome)
+            login_user(user)
             return redirect(url_for('cliente_dashboard'))
         else:
             flash('E-mail ou senha inválidos.', 'error')
