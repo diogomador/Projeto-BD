@@ -91,6 +91,14 @@ CREATE TABLE tb_emprestimo_livro (
     FOREIGN KEY (eml_liv_id) REFERENCES tb_livro(liv_id)
 );
 
+CREATE TABLE tb_logs_emprestimos (
+    log_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    log_emp_id INT NOT NULL,
+    log_acao VARCHAR(50),
+    log_data_hora DATETIME,
+    FOREIGN KEY (log_emp_id) REFERENCES tb_emprestimo(emp_id)
+);
+
 -- Login do Admin Inicial
 INSERT INTO tb_gerente (ger_codigo, ger_nome, ger_telefone, ger_email, ger_senha)
 VALUES (1, 'Administrador', '40028922', 'admin@biblioteca.com', '$2b$12$QyfS1b2byE1HwzzSLIdH1uW6XogT9Z1WWK5S9iNqkTIgL04IVQ9u2');
@@ -155,3 +163,82 @@ VALUES
 (1, 1, 2, 59.98),
 (2, 2, 1, 29.99),
 (3, 3, 1, 49.99);
+
+
+DELIMITER //
+
+CREATE FUNCTION calcular_multa(id_emprestimo INT) RETURNS DECIMAL(10,2)
+BEGIN
+    DECLARE multa DECIMAL(10,2);
+    DECLARE dias_atraso INT;
+    DECLARE taxa_diaria DECIMAL(10,2) DEFAULT 1.00;
+
+    SELECT DATEDIFF(NOW(), emp_dev) INTO dias_atraso
+    FROM tb_emprestimo
+    WHERE emp_id = id_emprestimo;
+
+    IF dias_atraso > 0 THEN
+        SET multa = dias_atraso * taxa_diaria;
+    ELSE
+        SET multa = 0.00;
+    END IF;
+
+    RETURN multa;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE validar_emprestimo(IN id_usuario INT, IN id_livro INT, IN data_devolucao DATE)
+BEGIN
+    DECLARE estoque INT;
+    DECLARE emprestimos_ativos INT;
+
+    -- Verificar estoque
+    SELECT liv_estoque INTO estoque
+    FROM tb_livro
+    WHERE liv_id = id_livro;
+
+    -- Verificar empréstimos ativos do usuário
+    SELECT COUNT(*) INTO emprestimos_ativos
+    FROM tb_emprestimo
+    WHERE emp_cli_id = id_usuario AND emp_dev < NOW();
+
+    IF estoque > 0 AND emprestimos_ativos = 0 THEN
+        INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_dev, emp_total, emp_status)
+        VALUES (id_usuario, NOW(), data_devolucao, 0, 'Ativo');
+        SELECT 'Empréstimo válido e realizado com sucesso.' AS mensagem;
+    ELSE
+        SELECT 'Empréstimo inválido. Verifique o estoque ou se há multas pendentes.' AS mensagem;
+    END IF;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER bloquear_usuario BEFORE INSERT ON tb_emprestimo
+FOR EACH ROW
+BEGIN
+    DECLARE multa_pendente DECIMAL(10,2);
+
+    SELECT calcular_multa(NEW.emp_id) INTO multa_pendente;
+
+    IF multa_pendente > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuário com multa pendente. Empréstimo bloqueado.';
+    END IF;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER log_emprestimos AFTER INSERT ON tb_emprestimo
+FOR EACH ROW
+BEGIN
+    INSERT INTO logs_emprestimos (id_emprestimo, acao, data_hora)
+    VALUES (NEW.emp_id, 'NOVO EMPRÉSTIMO', NOW());
+END //
+
+DELIMITER ;
