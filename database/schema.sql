@@ -253,3 +253,41 @@ BEGIN
 END //
 
 DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER log_emprestimos_delete AFTER DELETE ON tb_emprestimo
+FOR EACH ROW
+BEGIN
+    DECLARE nome_usuario VARCHAR(100);
+
+    -- Obter o nome do cliente que realizou o empréstimo
+    SELECT cli_nome INTO nome_usuario
+    FROM tb_cliente
+    WHERE cli_id = OLD.emp_cli_id;
+
+    -- Inserir o log na tabela tb_logs_emprestimos
+    INSERT INTO tb_logs_emprestimos (log_emp_id, log_acao, log_cli_id, log_usuario, log_data_hora)
+    VALUES (OLD.emp_id, 'DELETE', OLD.emp_cli_id, nome_usuario, NOW());
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER log_emprestimos_update AFTER UPDATE ON tb_emprestimo
+FOR EACH ROW
+BEGIN
+    DECLARE nome_usuario VARCHAR(100);
+
+    -- Obter o nome do cliente que realizou o empréstimo
+    SELECT cli_nome INTO nome_usuario
+    FROM tb_cliente
+    WHERE cli_id = NEW.emp_cli_id;
+
+    -- Inserir o log na tabela tb_logs_emprestimos
+    INSERT INTO tb_logs_emprestimos (log_emp_id, log_acao, log_cli_id, log_usuario, log_data_hora)
+    VALUES (NEW.emp_id, 'UPDATE', NEW.emp_cli_id, nome_usuario, NOW());
+END //
+
+DELIMITER ;
