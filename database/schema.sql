@@ -94,9 +94,12 @@ CREATE TABLE tb_emprestimo_livro (
 CREATE TABLE tb_logs_emprestimos (
     log_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     log_emp_id INT NOT NULL,
-    log_acao VARCHAR(50),
-    log_data_hora DATETIME,
-    FOREIGN KEY (log_emp_id) REFERENCES tb_emprestimo(emp_id)
+    log_acao VARCHAR(50) NOT NULL, -- Pode ser 'INSERT', 'UPDATE' ou 'DELETE'
+    log_cli_id INT NOT NULL, -- Identificador do cliente que realizou o empréstimo
+    log_usuario VARCHAR(100) NOT NULL, -- Nome do usuário que realizou a ação
+    log_data_hora DATETIME NOT NULL,
+    FOREIGN KEY (log_emp_id) REFERENCES tb_emprestimo(emp_id),
+    FOREIGN KEY (log_cli_id) REFERENCES tb_cliente(cli_id)
 );
 
 -- Login do Admin Inicial
@@ -237,8 +240,16 @@ DELIMITER //
 CREATE TRIGGER log_emprestimos AFTER INSERT ON tb_emprestimo
 FOR EACH ROW
 BEGIN
-    INSERT INTO logs_emprestimos (id_emprestimo, acao, data_hora)
-    VALUES (NEW.emp_id, 'NOVO EMPRÉSTIMO', NOW());
+    DECLARE nome_usuario VARCHAR(100);
+
+    -- Obter o nome do cliente que realizou o empréstimo
+    SELECT cli_nome INTO nome_usuario
+    FROM tb_cliente
+    WHERE cli_id = NEW.emp_cli_id;
+
+    -- Inserir o log na tabela tb_logs_emprestimos
+    INSERT INTO tb_logs_emprestimos (log_emp_id, log_acao, log_cli_id, log_usuario, log_data_hora)
+    VALUES (NEW.emp_id, 'INSERT', NEW.emp_cli_id, nome_usuario, NOW());
 END //
 
 DELIMITER ;
