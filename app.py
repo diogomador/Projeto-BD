@@ -3,7 +3,6 @@ from flask_mysqldb import MySQL
 from MySQLdb._exceptions import IntegrityError
 from flask_bcrypt import Bcrypt
 from functools import wraps
-from datetime import datetime, timedelta
 
 app = Flask(__name__)
 mysql = MySQL(app)
@@ -523,7 +522,7 @@ def emprestimo():
                 flash('Algum dos valores fornecidos é inválido.', 'error')
                 return redirect('/emprestimo')
 
-        # Inicializa o cursor com o padrão do flask-mysqldb (não é necessário usar DictCursor)
+        # Inicializa o cursor
         cursor = mysql.connection.cursor()
 
         total = 0
@@ -537,43 +536,61 @@ def emprestimo():
                 cursor.close()
                 return redirect('/emprestimo')
 
-            if livro[1] < item['quantidade']:  # A quantidade de estoque é o segundo item do resultado
+            if livro[1] < item['quantidade']:  # Verifica se há estoque suficiente
                 flash(f'O livro {item["livro_id"]} não tem estoque suficiente. Estoque atual: {livro[1]}.', 'error')
                 cursor.close()
                 return redirect('/emprestimo')
 
             total += livro[0] * item['quantidade']  # Preço * quantidade
 
+        # Verifica se o usuário tem multas pendentes usando a função calcular_multa
+        cursor.execute("""
+            SELECT emp_id 
+            FROM tb_emprestimo 
+            WHERE emp_cli_id = %s AND emp_status = 'Ativo' AND calcular_multa(emp_id) > 0
+        """, (session['user_id'],))
+        multa_pendente = cursor.fetchone()
+
+        if multa_pendente:
+            flash('Você tem multas pendentes. Regularize-as antes de realizar novos empréstimos.', 'error')
+            cursor.close()
+            return redirect('/emprestimo')
+
         # Insere o empréstimo
-        cursor.execute(
-            """
-            INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_status, emp_total, emp_dev)
-            VALUES (%s, NOW(), %s, %s, DATE_ADD(NOW(), INTERVAL %s DAY))
-            """,
-            (session['user_id'], 'Ativo', total, duracao_dias)
-        )
-        emprestimo_id = cursor.lastrowid
-
-        for item in emprestimo_livros:
-            cursor.execute("SELECT liv_preco FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
-            livro = cursor.fetchone()
-
+        try:
             cursor.execute(
                 """
-                INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_status, emp_total, emp_dev)
+                VALUES (%s, NOW(), %s, %s, DATE_ADD(NOW(), INTERVAL %s DAY))
                 """,
-                (emprestimo_id, item['livro_id'], item['quantidade'], item['quantidade'] * livro[0])
+                (session['user_id'], 'Ativo', total, duracao_dias)
             )
-            cursor.execute(
-                "UPDATE tb_livro SET liv_estoque = liv_estoque - %s WHERE liv_id = %s",
-                (item['quantidade'], item['livro_id'])
-            )
+            emprestimo_id = cursor.lastrowid
 
-        mysql.connection.commit()
-        cursor.close()
+            for item in emprestimo_livros:
+                cursor.execute("SELECT liv_preco FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
+                livro = cursor.fetchone()
 
-        flash('Empréstimo realizado com sucesso!', 'success')
+                cursor.execute(
+                    """
+                    INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (emprestimo_id, item['livro_id'], item['quantidade'], item['quantidade'] * livro[0])
+                )
+                cursor.execute(
+                    "UPDATE tb_livro SET liv_estoque = liv_estoque - %s WHERE liv_id = %s",
+                    (item['quantidade'], item['livro_id'])
+                )
+
+            mysql.connection.commit()
+            flash('Empréstimo realizado com sucesso!', 'success')
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Erro ao realizar empréstimo: {str(e)}', 'error')
+        finally:
+            cursor.close()
+
         return redirect('/gerenciar_emprestimos')
 
     # Método GET - Exibição dos livros
@@ -588,8 +605,6 @@ def emprestimo():
     cursor.close()
 
     return render_template('emprestimo.html', livros=livros)
-
-
 
 
 # Listagem de usuários com ordenação
