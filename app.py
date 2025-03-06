@@ -3,31 +3,13 @@ from flask_mysqldb import MySQL
 from MySQLdb._exceptions import IntegrityError
 from flask_bcrypt import Bcrypt
 from functools import wraps
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 app.secret_key = 'muitodificil'
 app.config.from_object('models.config.Config')
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login_cliente'
-
-class User(UserMixin):
-    def __init__(self, id, email, nome):
-        self.id = id
-        self.email = email
-        self.nome = nome
-
-@login_manager.user_loader
-def load_user(user_id):
-    cursor = mysql.connection.cursor()
-    cursor.execute("SELECT cli_id, cli_email, cli_nome FROM tb_cliente WHERE cli_id = %s", (user_id,))
-    user = cursor.fetchone()
-    cursor.close()
-    return User(user[0], user[1], user[2]) if user else None
 
 def is_email_taken(email):
     """
@@ -82,30 +64,38 @@ def index():
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
+        # Dados do cliente
         nome = request.form.get('nome')
         email = request.form.get('email')
         senha = request.form.get('senha')
         telefone = request.form.get('telefone')
+
+        # Dados do endereço
         estado = request.form.get('estado')
         cidade = request.form.get('cidade')
         bairro = request.form.get('bairro')
         rua = request.form.get('rua')
         numero = request.form.get('numero')
 
+        # Verificar se o e-mail já está em uso
         if is_email_taken(email):
             flash('Esse e-mail já está em uso. Por favor, escolha outro.', 'warning')
             return redirect(url_for('cadastro'))
 
+        # Hash da senha
         hashed_senha = bcrypt.generate_password_hash(senha).decode('utf-8')
 
         try:
             cursor = mysql.connection.cursor()
+
+            # Inserir cliente na tabela tb_cliente
             cursor.execute(
                 'INSERT INTO tb_cliente (cli_nome, cli_email, cli_senha, cli_telefone) VALUES (%s, %s, %s, %s)',
                 (nome, email, hashed_senha, telefone)
             )
             cliente_id = cursor.lastrowid
 
+            # Inserir endereço na tabela tb_endereco
             cursor.execute(
                 'INSERT INTO tb_endereco (end_cli_id, end_estado, end_cidade, end_bairro, end_rua, end_numero) '
                 'VALUES (%s, %s, %s, %s, %s, %s)',
@@ -126,21 +116,32 @@ def cadastro():
 
 @app.route('/login_cliente', methods=['GET', 'POST'])
 def login_cliente():
+    session.clear()
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
 
-        cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM tb_cliente WHERE cli_email = %s", (email,))
-        cliente = cursor.fetchone()
-        cursor.close()
+        try:
+            cursor = mysql.connection.cursor()
+            cursor.execute("SELECT * FROM tb_cliente WHERE cli_email = %s", (email,))
+            cliente = cursor.fetchone()
+            cursor.close()
 
-        if cliente and bcrypt.check_password_hash(cliente[4], senha):
-            user = User(cliente[0], cliente[1], cliente[2])
-            login_user(user)  # Usando Flask-Login para logar o usuário
-            return redirect(url_for('cliente_dashboard'))
-        else:
-            flash('E-mail ou senha inválidos.', 'error')
+            if not cliente:
+                flash('E-mail não encontrado.', 'error')
+                return redirect(url_for('login_cliente'))
+
+            if bcrypt.check_password_hash(cliente[4], senha):  # Índice 4 corresponde à senha
+                session['logged_in'] = True
+                session['user_id'] = cliente[0]
+                session['nome'] = cliente[1]
+                return redirect(url_for('cliente_dashboard'))
+            else:
+                flash('Senha incorreta.', 'error')
+
+        except Exception as e:
+            print(f"Erro no login do cliente: {e}")
+            flash('Erro interno no servidor.', 'error')
 
     return render_template('login_cliente.html')
 
@@ -179,13 +180,21 @@ def login_gerente():
 
 
 @app.route('/cliente_dashboard')
-@login_required
 def cliente_dashboard():
-    user_id = current_user.id
+    if not session.get('logged_in') or not session.get('user_id'):
+        return redirect(url_for('login_cliente'))
+    
+    user_id = session['user_id']
+
+    # Consulta os empréstimos do usuário
     cursor = mysql.connection.cursor()
-    cursor.execute("SELECT cli_nome FROM tb_cliente WHERE cli_id = %s", (user_id,))
+    cursor.execute("""
+        SELECT cli_nome
+        FROM tb_cliente 
+        WHERE cli_id = %s
+    """, (user_id,))
     cliente = cursor.fetchone()
-    cursor.close()
+
     return render_template('cliente_dashboard.html', cliente=cliente)
 
 @app.route('/admin_dashboard')
@@ -846,10 +855,9 @@ def devolver(emp_id):
 
 @app.route('/logout')
 def logout():
-    logout_user()  # Usando Flask-Login para logar o usuário
-    session.clear()
-    flash('Você foi desconectado.', 'success')
+    session.clear()  # Limpa todos os dados da sessão
     return redirect(url_for('login_cliente'))
+
 
 @app.route('/gerenciar_emprestimos')
 def gerenciar_emprestimos():
