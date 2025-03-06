@@ -909,3 +909,16 @@ def gerenciar_emprestimos():
     cursor.close()
 
     return render_template('gerenciar_emprestimos.html', emprestimos=emprestimos_com_livros)
+
+@app.route('/listagem_logs')
+def listagem_logs():
+    ordem = request.args.get('ordem', 'asc')  # Obtém o parâmetro de ordenação
+    query = "SELECT * FROM tb_logs_emprestimos ORDER BY log_data_hora {}".format(ordem)
+    
+    # Conecta ao banco de dados usando flask_mysqldb
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    logs = cur.fetchall()
+    cur.close()
+    
+    return render_template('listagem_logs.html', logs=logs)
