@@ -16,11 +16,13 @@
                     <li><a href="{{ url_for('cadastrar_autor') }}">Cadastrar Autor</a></li>
                     <li><a href="{{ url_for('cadastrar_editora') }}">Cadastrar Editora</a></li>
                     <li><a href="{{ url_for('cadastrar_genero') }}">Cadastrar Gênero</a></li>
+                    <form action="{{ url_for('logout') }}" method="get" id="sair">
+                        <button id="but_sair" type="submit">Fazer Logout</button>
                 </ul>
             </div>
-            <div id="filtros" style="height: 120vh;">
+            <div id="filtros">
                 <h2>Filtros</h2>
-                <ul style="height: 30%;">
+                <ul>
                     <li><a href="{{ url_for('listar_livros') }}">Listar Livros</a></li>
                     <li><a href="{{ url_for('listar_clientes') }}">Listar Clientes</a></li>
                     <li><a href="{{ url_for('listar_emprestimos') }}">Listar Empréstimos</a></li>
@@ -31,11 +33,9 @@
                 </ul>
             </div>
 
-            <form action="{{ url_for('logout') }}" method="get" id="sair">
-                <button id="but_sair" type="submit">Fazer Logout</button>
-            </form>
         </div>
-        <aside style="height: 120vh;">
+        </form>
+        <aside>
             <div id="infos">
                 <div class="info">
                     <span>{{total_livros}}</span>

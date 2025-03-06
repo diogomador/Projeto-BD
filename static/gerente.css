@@ -95,7 +95,7 @@ aside{
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    width: 30%;
+    width: 30vw;
     padding: 1rem;
     background-color: #052c25;
     color: #052c25;
@@ -139,22 +139,39 @@ aside{
 
 #container {
     display: flex;
+    flex-direction: row;
     width: 100vw;
-    height: 120vh;
-    gap: 2rem; /* Espaçamento entre as divs */
+    height: 100vh;
 }
 
-#filtros, #atividades {
+#filtros{
     display: flex;
     flex-direction: column;
     justify-content: center;
     background-color: #f9f9f9;
-    width: 40%; /* Ajuste a largura conforme necessário */
-    height: 50%; /* Altura automática para caber o conteúdo */
+    width: 30vw; /* Ajuste a largura conforme necessário */
+    height: 60vh; /* Altura automática para caber o conteúdo */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    border-radius: 40px;
     font-family: "Liter", sans-serif;
 }
+
+#filtros ul{
+    height: 18vh;
+}
+
+#atividades {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #f9f9f9;
+    width: 30vw; /* Ajuste a largura conforme necessário */
+    height: 40vh; /* Altura automática para caber o conteúdo */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 40px;
+    font-family: "Liter", sans-serif;
+}
+
 
 #filtros a, #atividades a {
     font-family: "Liter", sans-serif;
@@ -162,8 +179,8 @@ aside{
 
 /* Estilos para h2 dentro da div de filtros */
 #filtros h2 {
+    margin-top: -15vh;
     font-size: 2rem;
-    margin-bottom: 1rem; /* Espaçamento inferior */
 }
 
 #sair{
@@ -176,16 +193,13 @@ aside{
 }
 
 #but_sair{
-    height: 120%;
-    width: 15%;
-    margin-right: 20px;
+    height: 5vh;
+    width: 10vw;
     background-color: #052c25;
     color: #f9f9f9;
-    border-radius: 4px;
+    border-radius: 10px;
     border: none;
     font-size: 15px;
     cursor: pointer;
     font-family: "Liter", sans-serif;
-    margin-left: 50vw;
-    margin-top: -9vh;
 }
