@@ -27,9 +27,7 @@
             <thead>
                 <tr>
                     <th>
-                        <a href="{{ url_for('listagem_logs', ordem='asc') }}">▲</a>
                         Ação
-                        <a href="{{ url_for('listagem_logs', ordem='desc') }}">▼</a>
                     </th>
                     <th>
                         Usuário
@@ -38,7 +36,9 @@
                         Cliente
                     </th>
                     <th>
+                        <a href="{{ url_for('listagem_logs', ordem='asc') }}">▲</a>
                         Data e Hora
+                        <a href="{{ url_for('listagem_logs', ordem='desc') }}">▼</a>
                     </th>
                 </tr>
             </thead>

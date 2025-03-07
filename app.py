@@ -567,21 +567,27 @@ def emprestimo():
             )
             emprestimo_id = cursor.lastrowid
 
+            # Processa os livros para o empréstimo
             for item in emprestimo_livros:
                 cursor.execute("SELECT liv_preco FROM tb_livro WHERE liv_id = %s", (item['livro_id'],))
                 livro = cursor.fetchone()
 
-                cursor.execute(
-                    """
-                    INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
-                    VALUES (%s, %s, %s, %s)
-                    """,
-                    (emprestimo_id, item['livro_id'], item['quantidade'], item['quantidade'] * livro[0])
-                )
-                cursor.execute(
-                    "UPDATE tb_livro SET liv_estoque = liv_estoque - %s WHERE liv_id = %s",
-                    (item['quantidade'], item['livro_id'])
-                )
+                if livro:
+                    cursor.execute(
+                        """
+                        INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        (emprestimo_id, item['livro_id'], item['quantidade'], item['quantidade'] * livro[0])
+                    )
+                    cursor.execute(
+                        "UPDATE tb_livro SET liv_estoque = liv_estoque - %s WHERE liv_id = %s",
+                        (item['quantidade'], item['livro_id'])
+                    )
+                else:
+                    flash(f'O livro com ID {item["livro_id"]} não foi encontrado no banco de dados.', 'error')
+                    cursor.close()
+                    return redirect('/emprestimo')
 
             mysql.connection.commit()
             flash('Empréstimo realizado com sucesso!', 'success')
@@ -605,6 +611,8 @@ def emprestimo():
     cursor.close()
 
     return render_template('emprestimo.html', livros=livros)
+
+
 
 
 # Listagem de usuários com ordenação
@@ -806,15 +814,11 @@ def livros_nao_emprestados():
         with mysql.connection.cursor() as cursor:
             # Montagem da consulta SQL para livros em estoque
             query = """
-                SELECT 
-                    l.liv_id, 
-                    l.liv_titulo,
-                    l.liv_estoque
-                FROM 
-                    tb_livro l
-                WHERE 
-                    l.liv_estoque > 0  -- Apenas livros com estoque disponível
-            """
+            SELECT liv_id, liv_titulo 
+            FROM tb_livro 
+            JOIN tb_emprestimo_livro ON liv_id = eml_liv_id 
+            WHERE liv_id IS NULL;
+        """
             cursor.execute(query)
             livros_nao_emprestados = cursor.fetchall()
 
@@ -927,6 +931,7 @@ def calcular_multa(emp_id):
     flash(f"Multa calculada: R$ {multa:.2f}", "success")
 
     return redirect(url_for("gerenciar_emprestimos"))
+
 
 @app.route('/listagem_logs')
 def listagem_logs():

@@ -193,10 +193,18 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE validar_emprestimo(IN id_usuario INT, IN id_livro INT, IN data_devolucao DATE)
+CREATE PROCEDURE validar_emprestimo(
+    IN id_usuario INT, 
+    IN id_livro INT, 
+    IN data_devolucao DATE,
+    IN quantidade INT
+)
 BEGIN
     DECLARE estoque INT;
     DECLARE emprestimos_ativos INT;
+    DECLARE preco DECIMAL(10,2);
+    DECLARE total DECIMAL(10,2);
+    DECLARE emp_id INT;
 
     -- Verificar estoque
     SELECT liv_estoque INTO estoque
@@ -208,11 +216,41 @@ BEGIN
     FROM tb_emprestimo
     WHERE emp_cli_id = id_usuario AND emp_dev < NOW();
 
-    IF estoque > 0 AND emprestimos_ativos = 0 THEN
+    -- Se o estoque for suficiente e o usuário não tiver empréstimos pendentes
+    IF estoque >= quantidade AND emprestimos_ativos = 0 THEN
+        -- Criar o empréstimo na tabela tb_emprestimo
         INSERT INTO tb_emprestimo (emp_cli_id, emp_data_ini, emp_dev, emp_total, emp_status)
         VALUES (id_usuario, NOW(), data_devolucao, 0, 'Ativo');
+
+        -- Recuperar o emp_id do empréstimo recém-criado
+        SET emp_id = LAST_INSERT_ID();
+
+        -- Recuperar o preço do livro
+        SELECT liv_preco INTO preco
+        FROM tb_livro
+        WHERE liv_id = id_livro;
+
+        -- Calcular o total
+        SET total = preco * quantidade;
+
+        -- Inserir os livros na tabela tb_emprestimo_livro
+        INSERT INTO tb_emprestimo_livro (eml_emp_id, eml_liv_id, eml_quantidade, eml_preco)
+        VALUES (emp_id, id_livro, quantidade, total);
+
+        -- Atualizar o estoque do livro
+        UPDATE tb_livro 
+        SET liv_estoque = liv_estoque - quantidade 
+        WHERE liv_id = id_livro;
+
+        -- Atualizar o total do empréstimo
+        UPDATE tb_emprestimo
+        SET emp_total = emp_total + total
+        WHERE emp_id = emp_id;
+
+        -- Retornar mensagem de sucesso
         SELECT 'Empréstimo válido e realizado com sucesso.' AS mensagem;
     ELSE
+        -- Caso o estoque seja insuficiente ou haja empréstimos pendentes
         SELECT 'Empréstimo inválido. Verifique o estoque ou se há multas pendentes.' AS mensagem;
     END IF;
 END //
