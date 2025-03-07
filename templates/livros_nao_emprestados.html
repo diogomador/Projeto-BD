@@ -27,16 +27,25 @@
             <tr>
                 <th>ID</th>
                 <th>Título do Livro</th>
+                <th>Estoque</th>
             </tr>
         </thead>
         <tbody>
-            {% for livro in livros %}
-            <tr>
-                <td>{{ livro[0] }}</td>
-                <td>{{ livro[1] }}</td>
-            </tr>
-            {% endfor %}
+            {% if livros %}
+                {% for livro in livros %}
+                <tr>
+                    <td>{{ livro[0] }}</td>
+                    <td>{{ livro[1] }}</td>
+                    <td>{{ livro[2] }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2" style="text-align: center; font-weight: bold;">Todos os livros foram emprestados</td>
+                </tr>
+            {% endif %}
         </tbody>
+        
     </table>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

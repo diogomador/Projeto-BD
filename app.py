@@ -806,11 +806,15 @@ def livros_nao_emprestados():
         with mysql.connection.cursor() as cursor:
             # Montagem da consulta SQL para livros em estoque
             query = """
-            SELECT liv_id, liv_titulo 
-            FROM tb_livro 
-            JOIN tb_emprestimo_livro ON liv_id = eml_liv_id 
-            WHERE liv_id IS NULL;
-        """
+                SELECT 
+                    l.liv_id, 
+                    l.liv_titulo,
+                    l.liv_estoque
+                FROM 
+                    tb_livro l
+                WHERE 
+                    l.liv_estoque > 0  -- Apenas livros com estoque disponível
+            """
             cursor.execute(query)
             livros_nao_emprestados = cursor.fetchall()
 
