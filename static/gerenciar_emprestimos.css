@@ -69,6 +69,10 @@ h1 {
     list-style-type: none;
 }
 
+#calcular_multa {
+    font-size: 20px;
+}
+
 button {
     background-color: #052c25;
     color: #f9f9f9;
