@@ -20,6 +20,8 @@
         <input class="enviar" type="submit" value="Entrar">
     </form>
 
+    <p>Deseja conectar-se como cliente? <a href="{{ url_for('login_cliente') }}">Entre aqui</a>.</p>
+
     <a href="{{url_for('index')}}" class="btn-index">&#x2190; Voltar para a Página Inicial</a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
