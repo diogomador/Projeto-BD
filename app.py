@@ -923,3 +923,16 @@ def calcular_multa(emp_id):
     flash(f"Multa calculada: R$ {multa:.2f}", "success")
 
     return redirect(url_for("gerenciar_emprestimos"))
+
+@app.route('/listagem_logs')
+def listagem_logs():
+    ordem = request.args.get('ordem', 'asc')  # Obtém o parâmetro de ordenação
+    query = "SELECT * FROM tb_logs_emprestimos ORDER BY log_data_hora {}".format(ordem)
+    
+    # Conecta ao banco de dados usando flask_mysqldb
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    logs = cur.fetchall()
+    cur.close()
+    
+    return render_template('listagem_logs.html', logs=logs)
