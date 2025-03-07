@@ -906,3 +906,20 @@ def gerenciar_emprestimos():
     cursor.close()
 
     return render_template('gerenciar_emprestimos.html', emprestimos=emprestimos_com_livros)
+
+@app.route("/calcular_multa/<int:emp_id>", methods=["POST"])
+def calcular_multa(emp_id):
+    cursor = mysql.connection.cursor()
+
+    # Verificação do status do empréstimo
+    cursor.execute("""
+        SELECT calcular_multa(%s)
+    """, (emp_id,))
+    multa = cursor.fetchone()[0]  # Aqui pegamos apenas o valor da multa, que é o primeiro elemento
+
+    cursor.close()
+
+    # Usando o flash para passar a multa para o template
+    flash(f"Multa calculada: R$ {multa:.2f}", "success")
+
+    return redirect(url_for("gerenciar_emprestimos"))

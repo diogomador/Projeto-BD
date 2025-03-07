@@ -30,6 +30,9 @@
             {% endfor %}
         </ul>
         {% if item.emprestimo[3] == "Ativo" %}
+            <form action="{{url_for('calcular_multa', emp_id=item.emprestimo[0])}}" method="post">
+                <button type="submit">Calcular multa</button>
+            </form>
             <form action="{{url_for('devolver', emp_id=item.emprestimo[0])}}" method="post" onsubmit="return confirm('Tem certeza que deseja realizar devolução?')">
                 <button type="submit">Devolver</button>
             </form>
