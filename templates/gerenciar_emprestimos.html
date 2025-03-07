@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meus Empréstimos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='gerenciar_emprestimos.css') }}">
+    <link rel="shortcut icon" href="{{url_for('static', filename='images/book-icon.png')}}" type="image/x-icon">
 </head>
 <body>
     <nav>
+        <img src="{{url_for('static', filename='images/book-icon.png')}}" alt="" width="70vw" style="position: absolute; left: 5vw;">
         <a href="cliente_dashboard">Início</a>
         <a href="editar">Editar</a>
         <a href="emprestimo">Novo Emprestimo</a>

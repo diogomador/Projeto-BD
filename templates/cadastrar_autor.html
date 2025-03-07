@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='cadastrosgerais.css') }}">
+    <link rel="shortcut icon" href="{{url_for('static', filename='images/book-icon.png')}}" type="image/x-icon">
     <title>Cadastrar Autor</title>
 </head>
 <body>
     <nav>
+        <img src="{{url_for('static', filename='images/book-icon.png')}}" alt="" width="70vw" style="position: absolute; left: 5vw;">
         <a href="gerente_dashboard">Início</a>
         <a href="cadastrar_livro">Livro</a>
         <a style="background-color: #052c25; color: white" href="cadastrar_autor">Autor</a>

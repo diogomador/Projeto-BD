@@ -41,6 +41,14 @@ button:hover{
     transform: scale(1.1);
 }
 
+img {
+    z-index: -1;
+    opacity: 40%;
+    width: 50vw;
+    position: fixed;
+    left: 25vw;
+}
+
 .flash-messages {
     margin: 10px 0;
     padding: 10px;
